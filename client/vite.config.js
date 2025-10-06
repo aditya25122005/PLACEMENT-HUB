@@ -1,0 +1,14 @@
+// client/vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    // This proxies /api requests to your Express server running on port 5000
+    proxy: {
+      '/api': 'http://localhost:5000'
+    }
+  }
+})
