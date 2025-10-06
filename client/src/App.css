@@ -1,42 +1,619 @@
-#root {
-  max-width: 1280px;
+/* === GLOBAL THEME (REFINED) === */
+:root {
+  /* Colors */
+  --primary-color: #6d28d9; /* Elegant violet */
+  --secondary-color: #3b82f6; /* Bright blue accent */
+  --danger-color: #ef4444; /* Soft red for alerts */
+  --success-color: #10b981; /* Green for success */
+  --text-dark: #1e1b4b;
+  --text-light: #f9fafb;
+  --background-light: #f8fafc;
+  --background-dark: #f3f4f6;
+  --border-color: #e5e7eb;
+
+  /* Gradients */
+  --header-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  --button-gradient: linear-gradient(90deg, #6d28d9, #3b82f6);
+  --button-hover-gradient: linear-gradient(90deg, #7c3aed, #2563eb);
+  --score-card-gradient: linear-gradient(145deg, #ffffff, #f0f4ff);
+
+  /* Structure & Effects */
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-shadow: 0 8px 25px rgba(109, 40, 217, 0.1);
+  --card-hover-shadow: 0 10px 25px rgba(109, 40, 217, 0.18);
+  --transition-fast: all 0.3s ease-in-out;
+  --transition-slow: all 0.6s ease;
+  --radius: 14px;
+
+  /* Typography */
+  font-family: "Poppins", sans-serif;
+}
+
+/* === BASE STYLES & ANIMATION === */
+body {
+  /* Use 120deg gradient as animation reference */
+  background: linear-gradient(120deg, #ede9fe, #dbeafe, #e0f2fe);
+  background-size: 400% 400%; /* For the animation */
+  animation: gradientMove 12s ease infinite;
+  color: var(--text-dark);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-attachment: fixed;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+a, button, input[type="submit"], .option-item {
+  cursor: pointer;
+}
+
+a:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+/* FONT NORMALIZATION (Consolidated) */
+h1, h2, h3, p, button {
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 0.3px;
+}
+
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.1rem; }
+
+p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* === LAYOUT CONTAINERS === */
+.container,
+.auth-container,
+.topics-dashboard,
+.dashboard-section {
+  max-width: 1150px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
+}
+
+/* === CARD STYLE (General) === */
+.card,
+.topic-card-summary,
+.study-item-card,
+.dsa-item-card,
+.score-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 22px;
+  transition: var(--transition-fast);
+}
+
+.card:hover,
+.topic-card-summary:hover,
+.study-item-card:hover,
+.dsa-item-card:hover {
+  transform: translateY(-5px) scale(1.01); /* Subtle scale for extra pop */
+  box-shadow: var(--card-hover-shadow);
+}
+
+/* === SPECIFIC CARD STYLES === */
+
+/* Score Card (Override base card style with specific gradient) */
+.score-card {
+  background: var(--score-card-gradient);
+  border: 1px solid rgba(109, 40, 217, 0.08);
+  border-radius: 18px;
+  padding: 24px 20px;
+  box-shadow: 0 8px 18px rgba(109, 40, 217, 0.08);
+}
+
+.score-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.15);
+}
+
+.score-card h3 {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.score-card p {
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+/* Topics Dashboard Card */
+.topics-dashboard {
+  text-align: center;
+  /* Use a separate background/shadow for the container */
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(109, 40, 217, 0.05);
+  margin-top: 40px;
+}
+
+.topics-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+  margin-top: 35px;
+}
+
+.topic-card-summary {
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.topic-card-summary .card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.topic-card-summary .topic-action-tag {
+  display: inline-block;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--secondary-color); /* Used secondary for better visibility */
+}
+
+/* === HEADER & TITLE STYLES === */
+.section-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 40px 0 20px;
+}
+
+/* Main Header (Unified, Gradient Background) */
+.main-header,
+.mod-header {
+  background: var(--header-gradient);
+  color: white;
+  border-radius: var(--radius);
+  padding: 24px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 20px rgba(109, 40, 217, 0.25);
+  margin-bottom: 25px;
+}
+
+.main-header h1,
+.mod-header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: white; /* Title is white on gradient header */
+}
+
+.main-header small {
+  display: block;
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* === BUTTON STYLING (REFACTORED) === */
+
+/* Base Button Style (For all buttons/submissions) */
+button,
+input[type="submit"],
+.switch-btn,
+.reject-btn,
+.dsa-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Primary/Default Button Style (Uses gradient) */
+button,
+input[type="submit"],
+.switch-btn,
+.auth-form button,
+form input[type="submit"] {
+  background: var(--button-gradient);
+  color: white;
+}
+
+button:hover,
+input[type="submit"]:hover,
+.switch-btn:hover,
+.auth-form button:hover,
+form input[type="submit"]:hover {
+  transform: translateY(-2px); /* Use Y transform for a better lift feel */
+  background: var(--button-hover-gradient);
+}
+
+/* Specific Button Overrides */
+
+/* Danger/Reject Button */
+.reject-btn {
+  background: var(--danger-color);
+}
+
+.reject-btn:hover {
+  background: #b91c1c; /* Darker red */
+  transform: translateY(-2px);
+}
+
+/* Secondary DSA Button (Danger Color) */
+.dsa-btn.secondary {
+  background: var(--danger-color);
+  color: white;
+}
+
+.dsa-btn.secondary:hover {
+  opacity: 0.92;
+  transform: scale(1.04);
+}
+
+/* Primary DSA Button (Follows main button style) */
+.dsa-btn.primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.dsa-btn.primary:hover {
+  opacity: 0.92;
+  transform: scale(1.04);
+}
+
+/* Back Button (Similar to primary, kept separate for semantic styling) */
+.back-btn {
+  background: var(--secondary-color);
+  color: white;
+  gap: 8px;
+}
+
+.back-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* Arrow Enhancements (Applied to all appropriate buttons) */
+.switch-btn::before,
+.back-btn::before {
+  content: "←";
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.switch-btn {
+  gap: 8px; /* Ensure gap is set for switch-btn */
+}
+
+/* Hide extra arrow if already added manually */
+.switch-btn.manual-arrow::before {
+  content: "";
+}
+
+/* === FORM & INPUT STYLING (Consolidated) === */
+form,
+.resource-form,
+.admin-form,
+.submission-section {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  box-shadow: 0 5px 22px rgba(109, 40, 217, 0.08);
+  padding: 28px 32px;
+  margin-top: 25px;
+}
+
+form label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+form select,
+form textarea,
+form input:where([type="text"], [type="url"], [type="number"], [type="password"], [type="email"]) {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background: var(--background-light);
+  transition: var(--transition-fast);
+  font-size: 0.95rem;
+}
+
+form select:focus,
+form textarea:focus,
+form input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+}
+
+form textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* === AUTH SCREENS (Consolidated with form styles) === */
+.auth-container {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+  border-top: 6px solid var(--primary-color);
+  /* The padding, max-width, and margin are handled by the general container rule */
+}
+
+.auth-container h2 {
+  text-align: center;
+  color: var(--primary-color);
+}
+
+/* .auth-form input is now covered by the general form input rule */
+
+/* .auth-form button is now covered by the general button rule */
+.auth-form button {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.9rem;
+}
+
+/* === TAB NAVIGATION === */
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.tab-navigation button {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 18px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: var(--transition-fast);
+}
+
+.tab-navigation button:hover {
+  color: var(--secondary-color);
+}
+
+.tab-navigation button.active-tab-btn {
+  color: var(--primary-color);
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.tab-content {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 35px;
+  box-shadow: 0 2px 15px rgba(109, 40, 217, 0.05);
+}
+
+/* === DSA & STUDY MATERIAL === */
+.dsa-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.dsa-btn {
+  flex: 1;
+  text-decoration: none;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* === QUIZ SECTION === */
+.quiz-active-container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 35px;
+  border: 2px dashed var(--secondary-color);
+  border-radius: var(--radius);
+  background: var(--card-bg);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.option-item {
+  background: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  transition: var(--transition-fast);
+  margin-bottom: 10px; /* Added spacing between options */
+}
+
+.option-item:last-child {
+    margin-bottom: 0;
+}
+
+.option-item:hover {
+  background-color: #eef2ff; /* Light blue on hover */
+}
+
+.option-item.selected {
+  background-color: #e0e7ff;
+  border-color: var(--secondary-color);
+}
+
+/* === DASHBOARD METRICS === */
+.score-visual-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+}
+
+.progress-bar-container {
+  background-color: #e5e7eb;
+  border-radius: 6px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  text-align: right;
+  color: white;
+  font-weight: 600;
+  line-height: 20px;
+  padding-right: 8px;
+  border-radius: 6px;
+  transition: width var(--transition-slow);
+  white-space: nowrap; /* Prevent percentage text from wrapping */
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .tab-navigation {
+    flex-direction: column;
+    align-items: center;
   }
-  to {
-    transform: rotate(360deg);
+
+  .auth-container {
+    margin: 30px 15px;
+    padding: 25px;
   }
 }
+/* client/src/App.css (NEW DSA HUB STYLES) */
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.dsa-hub-container {
+    padding: 30px;
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+.dsa-summary-bar {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
 }
 
-.card {
-  padding: 2em;
+.dsa-problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.read-the-docs {
-  color: #888;
+.dsa-problem-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--background-light);
+    transition: all 0.3s;
+}
+
+.dsa-problem-card.solved {
+    background-color: #e6ffe6; /* Light green for solved */
+    border-left: 5px solid var(--secondary-color);
+}
+
+.problem-info {
+    flex-basis: 50%;
+}
+.problem-actions {
+    flex-basis: 45%;
+    display: flex;
+    gap: 10px;
+}
+
+.dsa-btn {
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    text-align: center;
+    flex-grow: 1;
+    font-size: 0.9rem;
+}
+.dsa-btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+.dsa-btn.secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.solve-toggle-btn {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.solve-toggle-btn.mark {
+    background-color: #ffc107; /* Yellow */
+    color: var(--text-dark);
+}
+.solve-toggle-btn.unmark {
+    background-color: var(--secondary-color);
+    color: white;
+}
+/* --- DSA Hub Internal Link Styling (For <summary> Tag) --- */
+
+.dsa-problem-card summary {
+    /* pointer cursor aur clickability ka look */
+    cursor: pointer; 
+    font-weight: 600;
+    color: var(--primary-color); /* Primary Blue color */
+    
+    /* Default browser styling (triangle/arrow) ko hatane ke liye */
+    display: flex;
+    align-items: center;
+    /* Webkit/Firefox ke liye default icon ko control karein */
+    list-style: none; /* Remove default marker */
+}
+
+/* Hover effect */
+.dsa-problem-card summary:hover {
+    color: #0056b3; /* Darker blue on hover */
+    text-decoration: underline; /* underline dikhayein takki user ko lage ki ye link hai */
+}
+
+/* Optional: Agar aap default triangle icon ko hatana chahte hain */
+.dsa-problem-card details {
+    /* Default spacing ko theek karne ke liye */
+    padding-left: 0; 
 }

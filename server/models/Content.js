@@ -1,17 +1,37 @@
 const mongoose = require('mongoose');
 
 const ContentSchema = new mongoose.Schema({
-    topic: { type: String, required: true },
-    question_text: { type: String, required: true },
-    explanation: { type: String },
-    source_url: { type: String },
-    // **This is the core feature for moderation**
+    topic: { 
+        type: String, 
+        required: true,
+        enum: ['Aptitude', 'DSA', 'HR', 'Core CS', 'OS', 'DBMS', 'CN'], 
+    },
+    question_text: { 
+        type: String, 
+        required: true 
+    },
+    explanation: { 
+        type: String 
+    },
+    source_url: { 
+        type: String 
+    },
+    // ✅ DSA and YouTube links are correctly added here
+    dsaProblemLink: { 
+        type: String
+    },
+    youtubeSolutionLink: { 
+        type: String
+    },
+    // CORE MODERATION FIELD
     status: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],
-        default: 'pending' // New submissions start here
+        default: 'pending'
     },
-    submitted_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-}, { timestamps: true });
+    // User field hum abhi hackathon ke liye chhod rahe hain
+}, { 
+    timestamps: true 
+});
 
 module.exports = mongoose.model('Content', ContentSchema);

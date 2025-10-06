@@ -1,4 +1,3 @@
-// client/vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -6,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // This proxies /api requests to your Express server running on port 5000
+    // Ye line '/api' requests ko port 5000 par bhej degi
     proxy: {
       '/api': 'http://localhost:5000'
     }
