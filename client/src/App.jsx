@@ -9,7 +9,7 @@ import DSAHub from './components/DSAHub'; // NEW IMPORT for dedicated DSA page
 import './App.css'; 
 
 // ✅ FINALIZED TOPICS LIST: DSA is now separate, Core CS is split into components.
-const TOPICS = ['Aptitude', 'HR', 'OS', 'DBMS', 'CN']; 
+const TOPICS = ['Aptitude', 'DSA-PLAN','HR', 'OS', 'DBMS', 'CN', 'REACT JS']; 
 
 // Helper function to group content by topic
 const groupContentByTopic = (contentArray) => {
@@ -162,7 +162,11 @@ const App = () => {
             </header>
             
             {/* 1. VISUAL DASHBOARD SECTION */}
-            <UserDashboard userId={userInfo._id} /> 
+            <UserDashboard
+             userId={userInfo._id} 
+             approvedContent={approvedContent} 
+
+            /> 
 
             {/* 2. TOPIC SELECTION SECTION */}
             <section className="topics-dashboard">

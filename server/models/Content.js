@@ -4,12 +4,13 @@ const ContentSchema = new mongoose.Schema({
     topic: { 
         type: String, 
         required: true,
-        enum: ['Aptitude', 'DSA', 'HR', 'Core CS', 'OS', 'DBMS', 'CN'], 
+        enum: ['Aptitude', 'DSA','DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'], 
     },
     question_text: { 
         type: String, 
-        required: true 
+        // required: true 
     },
+    videoTitle: { type: String }, 
     explanation: { 
         type: String 
     },
@@ -21,6 +22,9 @@ const ContentSchema = new mongoose.Schema({
         type: String
     },
     youtubeSolutionLink: { 
+        type: String
+    },
+    youtubeEmbedLink: { // <--- THIS WAS MISSING
         type: String
     },
     // CORE MODERATION FIELD

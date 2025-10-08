@@ -5,7 +5,7 @@ const QuizQuestionSchema = new mongoose.Schema({
         type: String, 
         required: true,
         // Update topics to include all subjects for the systematic flow
-        enum: ['Aptitude', 'DSA', 'HR', 'Core CS', 'OS', 'DBMS', 'CN'] 
+        enum: ['Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'] 
     },
     questionText: { 
         type: String, 

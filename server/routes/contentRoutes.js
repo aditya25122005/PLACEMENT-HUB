@@ -14,7 +14,9 @@ router.post('/submit', async (req, res) => {
             explanation, 
             source_url,
             dsaProblemLink, // <--- New DSA field
-            youtubeSolutionLink // <--- New YouTube field
+            youtubeSolutionLink,
+            youtubeEmbedLink, // <--- ADD THIS
+            videoTitle // <--- New YouTube field
         } = req.body;
         
         // Validation: Ensure required fields are present
@@ -30,6 +32,8 @@ router.post('/submit', async (req, res) => {
             source_url,
             dsaProblemLink, // ✅ Ensure all fields are passed to Content.create
             youtubeSolutionLink,
+            youtubeEmbedLink, // <--- ADD THIS
+            videoTitle,
             status: 'pending', 
         });
 
@@ -112,31 +116,44 @@ router.put('/reject/:id', async (req, res) => {
     }
 });
 
-
 // 6. POST /api/content/add-official: Moderator/Faculty can directly add approved content
 router.post('/add-official', async (req, res) => {
     try {
-        // ✅ CRITICAL FIX: Destructure all fields for official content as well
+        // ✅ CRITICAL FIX: Destructure all fields, including the new ones
         const { 
             topic, 
             question_text, 
             explanation, 
-            dsaProblemLink, // Include DSA field here too
-            youtubeSolutionLink 
+            dsaProblemLink, 
+            youtubeSolutionLink,
+            youtubeEmbedLink, // <--- ADDED!
+            videoTitle // <--- ADDED!
         } = req.body;
 
-        if (!topic || !question_text || !explanation) {
-             // Added validation for explanation here, as it is required for official content
-            return res.status(400).json({ message: 'Topic, Question, and Explanation are required for official content.' });
+        if (!topic) {
+            return res.status(400).json({ message: 'Topic is required for official content.' });
         }
         
-        // Official content directly 'approved' status ke saath save hoga
+        // Validation Logic (Checks if AT LEAST ONE content field exists)
+        if (
+            !question_text && // Title is now optional
+            !explanation &&
+            !dsaProblemLink &&
+            !youtubeSolutionLink &&
+            !youtubeEmbedLink
+        ) {
+            return res.status(400).json({ message: 'Content body missing. Please add an explanation OR at least one link.' });
+        }
+        
+        // Official content directly 'approved' status के saath save hoga
         const officialContent = await Content.create({
             topic,
             question_text,
             explanation,
-            dsaProblemLink, // ✅ Ensure DSA fields are passed
+            dsaProblemLink, 
             youtubeSolutionLink,
+            youtubeEmbedLink, // ✅ PASSED TO DB
+            videoTitle, // ✅ PASSED TO DB
             status: 'approved', 
         });
 
@@ -148,7 +165,6 @@ router.post('/add-official', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-
 
 // 7. GET /api/content/quiz: Fetch a random set of N approved questions
 router.get('/quiz', async (req, res) => {
@@ -174,4 +190,45 @@ router.get('/quiz', async (req, res) => {
     }
 });
 
+// 8. DELETE /api/content/:id: Delete any content (for Moderator QC)
+router.delete('/:id', async (req, res) => {
+    try {
+        const deletedContent = await Content.findByIdAndDelete(req.params.id);
+        if (!deletedContent) {
+            return res.status(404).json({ message: 'Content not found.' });
+        }
+        res.json({ message: 'Content successfully deleted.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete content.' });
+    }
+});
+
+// 9. PUT /api/content/:id: Update existing content (Edit)
+router.put('/:id', async (req, res) => {
+    try {
+        // Only allow updating the fields that are sent in the body
+        const updatedContent = await Content.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body },
+            { new: true, runValidators: true } // Return new doc and run schema validators
+        );
+
+        if (!updatedContent) {
+            return res.status(404).json({ message: 'Content not found.' });
+        }
+        res.json({ message: 'Content successfully updated.', content: updatedContent });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update content.' });
+    }
+});
+
+// 10. GET /api/content/all: Get ALL content (Approved, Rejected, Pending) for full admin overview
+router.get('/all', async (req, res) => {
+    try {
+        const allContent = await Content.find().sort({ createdAt: -1 });
+        res.json(allContent);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch all content.' });
+    }
+});
 module.exports = router;

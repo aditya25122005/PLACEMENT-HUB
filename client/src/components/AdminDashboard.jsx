@@ -1,31 +1,48 @@
 import React, { useState } from 'react';
-import OfficialContentForm from './OfficialContentForm'; // Reuse: Official content input
-// Assuming you rename and modify ModeratorDashboard to handle the pending list
+import OfficialContentForm from './OfficialContentForm'; 
 import PendingContentManager from './PendingContentManager'; 
-import QuizManagement from './QuizManagement'; // NEW Component for quiz adding/approving
+import QuizManagement from './QuizManagement'; 
+import ContentLibrary from './ContentLibrary';
+import QuizLibrary from './QuizLibrary';
 import '../App.css'
+
+// Tab List
+const tabs = [
+    { id: 'pending_content', name: 'Verify Submissions' },
+    { id: 'add_official', name: 'Add Official Material' },
+    { id: 'manage_quizzes', name: 'Manage Quizzes' },
+    // ✅ NEW TAB for Full CRUD Control
+    { id: 'content_library', name: 'Content Library' },
+    { id: 'quiz_library', name: 'Quiz Library' },
+];
+
 const AdminDashboard = ({ onContentApprovedOrAdded, fetchApprovedContent }) => {
     const [activeTab, setActiveTab] = useState('pending_content');
     
-    // Tab List
-    const tabs = [
-        { id: 'pending_content', name: 'Verify Student Submissions' },
-        { id: 'add_official', name: 'Add Official Material' },
-        { id: 'manage_quizzes', name: 'Manage Quizzes' },
-    ];
-
     // Renders the component based on the active tab
     const renderTabContent = () => {
         switch (activeTab) {
             case 'pending_content':
-                // Reuse the logic from your old ModeratorDashboard but rename it
+                // Handles submissions approval/rejection
                 return <PendingContentManager onContentApproved={onContentApprovedOrAdded} />; 
+                
             case 'add_official':
-                // Reuse the OfficialContentForm
+                // Handles direct official content creation
                 return <OfficialContentForm onContentAdded={onContentApprovedOrAdded} />;
+                
             case 'manage_quizzes':
-                // New component to add/approve quiz questions
+                // Handles adding new quizzes and moderating pending quizzes
                 return <QuizManagement />; 
+                
+            case 'content_library':
+                // ✅ NEW CASE: Content Library for CRUD operations
+                // We pass fetchApprovedContent to trigger a full content refresh after any Delete/Edit action
+                return <ContentLibrary onContentChange={onContentApprovedOrAdded} />; 
+            
+            case 'quiz_library':
+            // Pass the onContentChange prop for refresh logic
+            return <QuizLibrary onContentChange={onContentApprovedOrAdded} />;     
+                
             default:
                 return <PendingContentManager onContentApproved={onContentApprovedOrAdded} />;
         }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-const TOPICS_FOR_QUIZ = ['Aptitude', 'DSA', 'HR', 'OS', 'DBMS', 'CN']; 
+const TOPICS_FOR_QUIZ = ['Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS']; 
 
 // Helper function to initialize the form state for a new question
 const initialFormState = {

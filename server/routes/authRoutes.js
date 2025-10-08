@@ -69,4 +69,25 @@ router.get('/profile/:id', async (req, res) => {
         res.status(500).json({ message: 'Error fetching profile data.' });
     }
 });
+// 4. PUT /api/auth/watch-content/:userId: Marks a content item as watched
+router.put('/watch-content/:userId', async (req, res) => {
+    const { contentId } = req.body;
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Check if the ID is already present in the watchedContent array
+        if (!user.watchedContent.includes(contentId)) {
+            user.watchedContent.push(contentId);
+            user.markModified('watchedContent');
+            await user.save();
+        }
+        
+        // Return updated list of watched IDs
+        res.json({ watchedList: user.watchedContent }); 
+
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to mark content as watched.' });
+    }
+});
 module.exports = router;

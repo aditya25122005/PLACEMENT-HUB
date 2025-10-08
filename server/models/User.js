@@ -20,6 +20,8 @@ const UserSchema = new mongoose.Schema({
     // NEW: Dashboard ke liye scores
     scores: [ScoreSchema],
     solvedDSA: [{ type: String }], 
+    watchedContent: [{ type: String }], 
+
 }, { timestamps: true });
 
 // Middleware: Password ko save karne se pehle hash karna

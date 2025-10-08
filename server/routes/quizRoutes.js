@@ -158,4 +158,48 @@ router.get('/all-dsa', async (req, res) => {
 });
 
 
+// server/routes/quizRoutes.js (Add to existing file)
+
+// 8. GET /api/quiz/all: Get ALL Quiz Questions (Approved, Pending, Rejected)
+router.get('/all', async (req, res) => {
+    try {
+        // Fetch ALL quiz questions without excluding the correct answer
+        const allQuizzes = await QuizQuestion.find().sort({ createdAt: -1 });
+        res.json(allQuizzes);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch all quizzes.' });
+    }
+});
+
+// 9. PUT /api/quiz/:id: Update existing Quiz Question (Edit)
+router.put('/:id', async (req, res) => {
+    try {
+        const updatedQuiz = await QuizQuestion.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body }, // $set updates only the fields sent in req.body
+            { new: true, runValidators: true } 
+        );
+        if (!updatedQuiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
+        }
+        res.json({ message: 'Quiz updated successfully.', quiz: updatedQuiz });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update quiz.' });
+    }
+});
+
+// 10. DELETE /api/quiz/:id: Delete a Quiz Question
+router.delete('/:id', async (req, res) => {
+    try {
+        const deletedQuiz = await QuizQuestion.findByIdAndDelete(req.params.id);
+        if (!deletedQuiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
+        }
+        res.json({ message: 'Quiz successfully deleted.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete quiz.' });
+    }
+});
+
+
 module.exports = router;
