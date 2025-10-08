@@ -3,14 +3,11 @@
 const express = require('express');
 const router = express.Router();
 const QuizQuestion = require('../models/QuizQuestion');
-const User = require('../models/User'); // User Model is required for score update
+const User = require('../models/User'); 
 const Content=require('../models/Content')
-// ======================= 1. STUDENT ROUTES =======================
-
 // 1. GET /api/quiz/topic/:topicName: Fetch approved questions for quiz attempt
 router.get('/topic/:topicName', async (req, res) => {
     try {
-        // Only fetch approved questions and exclude the correct answer for security
         const questions = await QuizQuestion.find({ 
             topic: req.params.topicName, 
             status: 'approved' 
@@ -23,15 +20,12 @@ router.get('/topic/:topicName', async (req, res) => {
 
 // 2. POST /api/quiz/submit-answers: Calculate score and update user dashboard
 router.post('/submit-answers', async (req, res) => {
-    // We assume userId, topic, and answers are sent from the frontend
     const { topic, answers, userId } = req.body; 
     let score = 0;
     
     try {
         const questionIds = Object.keys(answers);
         const correctQuestions = await QuizQuestion.find({ _id: { $in: questionIds } });
-
-        // Score calculation logic
         correctQuestions.forEach(q => {
             const submittedIndex = answers[q._id.toString()];
             if (submittedIndex === q.correctAnswer) {
@@ -39,34 +33,26 @@ router.post('/submit-answers', async (req, res) => {
             }
         });
 
-        // **Dashboard Update Logic (Guaranteed Save)**
         if (userId) { 
             const user = await User.findById(userId);
             if (user) {
-                // Find the index to locate the exact score sub-document
+
                 const topicIndex = user.scores.findIndex(s => s.topic === topic);
                 let scoreEntry = topicIndex !== -1 ? user.scores[topicIndex] : null;
-
-                // Case 1: Score does not exist (Create New Entry)
                 if (!scoreEntry) {
                     user.scores.push({ topic, highScore: score, lastAttempt: Date.now() });
                 } 
-                // Case 2: Score exists (Update High Score/Date)
+ 
                 else {
-                    // Update only if the score is higher or equal (to update the date)
                     if (score >= scoreEntry.highScore) { 
                         user.scores[topicIndex].highScore = score;
                     }
                     user.scores[topicIndex].lastAttempt = Date.now();
-
-                    // ⚠️ CRITICAL FIX: Mark the array as modified for Mongoose to save changes
                     user.markModified('scores');
                 }
-                
                 await user.save();
             }
         }
-        
         res.json({ score, totalQuestions: questionIds.length });
     } catch (error) {
         console.error("Score update error:", error);
@@ -74,14 +60,10 @@ router.post('/submit-answers', async (req, res) => {
     }
 });
 
-
-// ======================= 2. MODERATOR ROUTES =======================
-
 // 4. POST /api/quiz/add: Moderator adds a new Quiz Question (Pending or Approved)
 router.post('/add', async (req, res) => {
     const { topic, questionText, options, correctAnswer, status } = req.body;
     try {
-        // Basic validation for options count
         if (!options || options.length !== 4) {
              return res.status(400).json({ message: 'Quiz must have exactly 4 options.' });
         }
@@ -147,8 +129,6 @@ router.get('/all-dsa', async (req, res) => {
             dsaProblemLink: { $exists: true, $ne: '' },
             status: 'approved',
         })
-        // .select('question_text dsaProblemLink youtubeSolutionLink topic');
-
         res.json(dsaMaterial);
     } catch (error) {
         // Log the actual server error to the console for better debugging
@@ -157,8 +137,6 @@ router.get('/all-dsa', async (req, res) => {
     }
 });
 
-
-// server/routes/quizRoutes.js (Add to existing file)
 
 // 8. GET /api/quiz/all: Get ALL Quiz Questions (Approved, Pending, Rejected)
 router.get('/all', async (req, res) => {

@@ -3,18 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-import EditQuizModal from './EditQuizModal';
-// NOTE: We assume you will create a similar EditQuizModal.jsx component if needed
+import EditQuizModal from './EditQuizModal'; // We assume this is imported
 
-// Topics list for filtering (Must match QuizQuestion.js enum)
-const ALL_TOPICS_QUIZ = ['All', 'Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN', 'REACT JS']; 
 
-const QuizLibrary = ({ onContentChange }) => {
-    const [allQuizzes, setAllQuizzes] = useState([]); // Changed name to allQuizzes
+// Component signature now receives subjectList prop
+const QuizLibrary = ({ onContentChange, subjectList }) => { // ✅ subjectList received
+    const [allQuizzes, setAllQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
     
-    // MODAL STATES (For editing quiz)
+    // MODAL STATES
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentQuiz, setCurrentQuiz] = useState(null); 
     
@@ -26,7 +24,7 @@ const QuizLibrary = ({ onContentChange }) => {
     const fetchAllQuizzes = async () => {
         setLoading(true);
         try {
-            // ✅ CRITICAL FETCH: Hitting the GET /api/quiz/all route
+            // Hitting the GET /api/quiz/all route
             const response = await axios.get('/api/quiz/all'); 
             setAllQuizzes(response.data);
             setLoading(false);
@@ -43,13 +41,12 @@ const QuizLibrary = ({ onContentChange }) => {
 
     // 2. Delete Handler (The 'D' in CRUD)
     const handleDelete = async (id, question) => {
-        // NOTE: window.confirm() replaces alert() for better user experience
         if (!window.confirm(`Are you sure you want to permanently delete quiz: "${question}"?`)) {
             return;
         }
 
         try {
-            // ✅ CRITICAL ACTION: Hitting the DELETE /api/quiz/:id route
+            // CRITICAL ACTION: Hitting the DELETE /api/quiz/:id route
             await axios.delete(`/api/quiz/${id}`); 
             setMessage(`✅ Quiz "${question.substring(0, 30)}..." deleted successfully.`);
             
@@ -66,7 +63,6 @@ const QuizLibrary = ({ onContentChange }) => {
     const handleEdit = (quizItem) => {
         setCurrentQuiz(quizItem); // Load the data
         setIsModalOpen(true);     // Open the modal
-        // NOTE: For a real hackathon, you would now implement EditQuizModal.jsx
     };
     
     // 4. Close Modal Handler (Refreshes data after update)
@@ -77,7 +73,7 @@ const QuizLibrary = ({ onContentChange }) => {
         onContentChange(); // Notify App.jsx to refresh student view
     };
 
-    // 5. Filter Logic
+    // 5. Filter Logic (Uses the dynamic subjectList prop)
     const filteredQuizzes = selectedFilter === 'All'
         ? allQuizzes
         : allQuizzes.filter(item => item.topic === selectedFilter);
@@ -87,7 +83,7 @@ const QuizLibrary = ({ onContentChange }) => {
         return <h3 style={{ textAlign: 'center' }}>Loading Full Quiz Library...</h3>;
     }
     
-    // Helper to get status color (remains the same)
+    // Helper to get status color
     const getStatusColor = (status) => {
         if (status === 'approved') return 'green';
         if (status === 'pending') return 'orange';
@@ -99,9 +95,9 @@ const QuizLibrary = ({ onContentChange }) => {
     return (
         <div className="content-library-container">
             <h3>Full Quiz Library (Total: {allQuizzes.length})</h3>
-            {message && <p className="submission-message success">{message}</p>}
+            {message && <p className={`submission-message ${message.startsWith('✅') ? 'success' : 'error'}`}>{message}</p>}
 
-            {/* ✅ FILTER UI */}
+            {/* ✅ FILTER UI - Now uses dynamic subjectList */}
             <div className="filter-bar-crud">
                 <label>Filter by Topic:</label>
                 <select 
@@ -109,7 +105,9 @@ const QuizLibrary = ({ onContentChange }) => {
                     onChange={(e) => setSelectedFilter(e.target.value)}
                     style={{ padding: '8px', borderRadius: '5px' }}
                 >
-                    {ALL_TOPICS_QUIZ.map(topic => (
+                    {/* 🎯 FIX APPLIED: Manually add "All" option + use dynamic subjectList */}
+                    <option value="All">All</option>
+                    {subjectList && subjectList.map(topic => (
                         <option key={topic} value={topic}>{topic}</option>
                     ))}
                 </select>
@@ -146,14 +144,15 @@ const QuizLibrary = ({ onContentChange }) => {
                 </div>
             ))}
             
-            {/* 7. MODAL RENDERING (Uncomment this block) */}
-                {isModalOpen && currentQuiz && (
-                    <EditQuizModal 
-                        isOpen={isModalOpen} 
-                        onClose={handleCloseModal}
-                        quizData={currentQuiz}
-                    />
-                )}
+            {/* 7. MODAL RENDERING */}
+            {isModalOpen && currentQuiz && (
+                <EditQuizModal 
+                    isOpen={isModalOpen} 
+                    onClose={handleCloseModal}
+                    quizData={currentQuiz}
+                    subjectList={subjectList} // Pass the dynamic list to the modal
+                />
+            )}
         </div>
     );
 };

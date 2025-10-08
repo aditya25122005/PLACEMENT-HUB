@@ -5,10 +5,10 @@ import axios from 'axios';
 import '../App.css'; 
 import EditContentModal from './EditContentModal'; 
 
-// Topics list for filtering (Must match Content.js enum)
-const ALL_TOPICS_FILTER = ['All', 'Aptitude', 'DSA', 'HR', 'OS', 'DBMS', 'CN', 'Core CS']; 
+// Topics list for filtering: This will now be handled dynamically
 
-const ContentLibrary = ({ onContentChange }) => {
+// Component signature now receives subjectList prop
+const ContentLibrary = ({ onContentChange, subjectList }) => { // ✅ subjectList received
     const [allContent, setAllContent] = useState([]);
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
@@ -17,7 +17,7 @@ const ContentLibrary = ({ onContentChange }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentContent, setCurrentContent] = useState(null); 
     
-    // ✅ NEW STATE: To track the currently selected topic filter
+    // To track the currently selected topic filter
     const [selectedFilter, setSelectedFilter] = useState('All'); 
 
 
@@ -25,7 +25,7 @@ const ContentLibrary = ({ onContentChange }) => {
     const fetchAllContent = async () => {
         setLoading(true);
         try {
-            // Hitting the new GET /api/content/all route
+            // Hitting the GET /api/content/all route
             const response = await axios.get('/api/content/all'); 
             setAllContent(response.data);
             setLoading(false);
@@ -42,7 +42,6 @@ const ContentLibrary = ({ onContentChange }) => {
 
     // 2. Delete Handler (The 'D' in CRUD)
     const handleDelete = async (id, question) => {
-        // NOTE: We replace alert() with window.confirm() for browser compatibility
         if (!window.confirm(`Are you sure you want to permanently delete: "${question}"?`)) {
             return;
         }
@@ -63,7 +62,7 @@ const ContentLibrary = ({ onContentChange }) => {
     // 3. Edit Handler (Opens the modal)
     const handleEdit = (contentItem) => {
         setCurrentContent(contentItem); // Load the data
-        setIsModalOpen(true);          // Open the modal
+        setIsModalOpen(true);          // Open the modal
     };
     
     // 4. Close Modal Handler (Refreshes data after update)
@@ -74,7 +73,7 @@ const ContentLibrary = ({ onContentChange }) => {
         onContentChange(); // Notify App.jsx to refresh student view
     };
 
-    // 5. Filter Logic
+    // 5. Filter Logic (Uses the dynamic subjectList prop)
     const filteredContent = selectedFilter === 'All'
         ? allContent
         : allContent.filter(item => item.topic === selectedFilter);
@@ -98,18 +97,21 @@ const ContentLibrary = ({ onContentChange }) => {
             <h3>Full Content Library (Total: {allContent.length})</h3>
             {message && <p className="submission-message success">{message}</p>}
 
-            {/* ✅ NEW FILTER UI */}
+            {/* ✅ FILTER UI - Now uses dynamic subjectList prop */}
             <div className="filter-bar-crud">
                 <label>Filter by Topic:</label>
-                <select 
-                    value={selectedFilter} 
-                    onChange={(e) => setSelectedFilter(e.target.value)}
-                    style={{ padding: '8px', borderRadius: '5px' }}
-                >
-                    {ALL_TOPICS_FILTER.map(topic => (
-                        <option key={topic} value={topic}>{topic}</option>
-                    ))}
-                </select>
+            <select 
+                value={selectedFilter} 
+                onChange={(e) => setSelectedFilter(e.target.value)}
+                style={{ padding: '8px', borderRadius: '5px' }}
+            >
+                {/* 🎯 FIX 2: Manually add "All" option for filtering */}
+                <option value="All">All</option> 
+                
+                {subjectList && subjectList.map(topic => (
+                    <option key={topic} value={topic}>{topic}</option>
+                ))}
+            </select>
                 <span style={{marginLeft: '20px', fontWeight: 'bold'}}>
                     Showing {filteredContent.length} items in view.
                 </span>
@@ -148,6 +150,7 @@ const ContentLibrary = ({ onContentChange }) => {
                     isOpen={isModalOpen} 
                     onClose={handleCloseModal} 
                     contentData={currentContent}
+                    subjectList={subjectList} // ✅ PASSING SUBJECT LIST TO MODAL
                 />
             )}
         </div>

@@ -4,7 +4,7 @@ const ContentSchema = new mongoose.Schema({
     topic: { 
         type: String, 
         required: true,
-        enum: ['Aptitude', 'DSA','DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'], 
+        // enum: ['Aptitude', 'DSA','DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'], 
     },
     question_text: { 
         type: String, 

@@ -4,18 +4,17 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css'; 
 
-// Topics list जो App.jsx और Content.js से match करती है
-// Note: Core CS को split करने के बाद, यह फाइनल लिस्ट है
-const SUBMISSION_TOPICS = ['Aptitude', 'DSA', 'HR', 'OS', 'DBMS', 'CN', 'Core CS'];
+// ❌ NOTE: The hardcoded SUBMISSION_TOPICS array is removed.
+// We assume subjectList will be passed as a prop from App.jsx
 
-const ContentSubmissionForm = ({ onSubmissionSuccess }) => {
+const ContentSubmissionForm = ({ onSubmissionSuccess, subjectList }) => { // ✅ subjectList received as prop
     // State to manage the form inputs
     const [formData, setFormData] = useState({
-        topic: 'Aptitude',
+        // Set initial topic to the first subject in the dynamic list, or 'Aptitude' as fallback
+        topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', 
         question_text: '',
         explanation: '',
         source_url: '',
-        // ✅ CRITICAL FIX: DSA Link states added
         dsaProblemLink: '', 
         youtubeSolutionLink: '',
     });
@@ -42,23 +41,25 @@ const ContentSubmissionForm = ({ onSubmissionSuccess }) => {
         setMessage('');
 
         try {
-            // Backend API ready for all fields (which will be saved with status: 'pending')
+            // Backend API ready for all fields, which will be saved with status: 'pending'
             await axios.post('/api/content/submit', formData);
 
             setMessage('✅ Success! Your content is submitted for moderator review.');
             
             // Reset the form after successful submission
             setFormData({
-                topic: 'Aptitude',
+                // Reset topic to the first subject in the dynamic list
+                topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude',
                 question_text: '',
                 explanation: '',
                 source_url: '',
-                dsaProblemLink: '', // Reset
-                youtubeSolutionLink: '', // Reset
+                dsaProblemLink: '',
+                youtubeSolutionLink: '',
             });
             
+            // Note: onSubmissionSuccess is called to refresh the main dashboard counts if needed
             if (onSubmissionSuccess) {
-                 // Refresh logic is not needed here as content goes to PENDING, not approved list.
+                onSubmissionSuccess();
             }
 
         } catch (error) {
@@ -77,11 +78,11 @@ const ContentSubmissionForm = ({ onSubmissionSuccess }) => {
             
             <form onSubmit={handleSubmit} className="submission-form">
                 
-                {/* Topic Selection */}
+                {/* Topic Selection - Now uses dynamic list */}
                 <label>Topic Category:</label>
                 <select name="topic" value={formData.topic} onChange={handleChange} required>
-                    {/* ✅ FIX: Use the expanded topic list for correct database validation */}
-                    {SUBMISSION_TOPICS.map(t => (
+                    {/* ✅ FIX APPLIED: Using dynamic subjectList prop */}
+                    {subjectList.map(t => (
                         <option key={t} value={t}>{t}</option>
                     ))}
                 </select>
@@ -109,9 +110,7 @@ const ContentSubmissionForm = ({ onSubmissionSuccess }) => {
 
                 <hr style={{margin: '20px 0', border: '1px solid #f0f0f0'}}/> 
 
-                {/* ======================================================= */}
-                {/* ✅ CRITICAL FIX: EXTERNAL LINK INPUTS ADDED */}
-                {/* ======================================================= */}
+                {/* External Links */}
                 <h4>External Source Links (Optional)</h4>
 
                 <label>Original Source Link (Where you found it):</label>

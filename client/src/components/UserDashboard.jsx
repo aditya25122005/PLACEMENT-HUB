@@ -4,12 +4,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../App.css'; 
 
-// Topics list (Must match App.jsx and Content.js)
-const ALL_TOPICS = ['Aptitude','DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS']; 
 const MAX_QUIZ_SCORE = 5; // Fixed quiz score limit
 
-// UserDashboard now receives approvedContent array from App.jsx
-const UserDashboard = ({ userId, approvedContent }) => { 
+// UserDashboard now receives approvedContent AND subjectList from App.jsx
+const UserDashboard = ({ userId, approvedContent, subjectList }) => { 
     const [userScores, setUserScores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [videoProgress, setVideoProgress] = useState([]); 
@@ -29,16 +27,12 @@ const UserDashboard = ({ userId, approvedContent }) => {
                 const userData = userResponse.data;
                 
                 setUserScores(userData.scores || []);
-                
-                // -------------------------------------------------------------
-                // ✅ VIDEO PROGRESS CALCULATION LOGIC
-                // -------------------------------------------------------------
                 const progressData = [];
                 const watchedIds = userData.watchedContent || [];
 
-                ALL_TOPICS.forEach(topic => {
+                // Use the dynamically fetched subjectList for iteration
+                subjectList.forEach(topic => { 
                     // 1. Find all content items that are videos for this specific topic
-                    // Use optional chaining just in case approvedContent is somehow still undefined
                     const allTopicVideos = approvedContent
                         .filter(item => item.topic === topic && item.youtubeEmbedLink);
                     
@@ -61,21 +55,19 @@ const UserDashboard = ({ userId, approvedContent }) => {
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching user dashboard data:", error);
-                // Fallback to empty state on error
                 setUserScores([]); 
                 setVideoProgress([]);
                 setLoading(false);
             }
         };
 
-        // ✅ CRITICAL FIX: Run only if user is logged in AND approvedContent is a valid array with data
-        if (userId && Array.isArray(approvedContent) && approvedContent.length > 0) {
+        if (userId && Array.isArray(approvedContent) && approvedContent.length > 0 && subjectList.length > 0) {
             fetchAllData();
-        } else if (userId && Array.isArray(approvedContent) && approvedContent.length === 0) {
-             // Load the dashboard even if no content is approved yet
+        } else if (userId && Array.isArray(subjectList) && subjectList.length > 0) {
+             // Load the dashboard if subjects are present, even if content is 0
             setLoading(false);
         }
-    }, [userId, approvedContent]); 
+    }, [userId, approvedContent, subjectList]); // Added subjectList to dependencies
     
     // Helper to get video progress for rendering
     const getVideoProgress = (topic) => {
@@ -91,15 +83,12 @@ const UserDashboard = ({ userId, approvedContent }) => {
     return (
         <section className="dashboard-section">
             <h2 className="section-title">📘 Your Systematic Progress Dashboard</h2>
-            
-            {/* 🎯 TOPIC MASTERY (QUIZ SCORES + VIDEO PROGRESS) */}
             <div className="score-visual-grid">
-                {ALL_TOPICS.map(topic => {
+     
+                {subjectList.map(topic => {
                     const scoreData = userScores.find(s => s.topic === topic);
                     const score = scoreData ? scoreData.highScore : 0;
                     const percentage = getScorePercentage(score);
-                    
-                    // NEW: Get corresponding video progress data
                     const videoData = getVideoProgress(topic);
 
                     return (
@@ -113,7 +102,6 @@ const UserDashboard = ({ userId, approvedContent }) => {
                             <div className="progress-bar-container">
                                 <div 
                                     className="progress-bar" 
-                                    // FIX: Do not show the bar if score is 0
                                     style={{ width: score > 0 ? `${percentage}%` : '0%', backgroundColor: 'var(--secondary-color)' }}
                                 >
                                     {score > 0 ? `${Math.round(percentage)}%` : ''}
@@ -145,7 +133,6 @@ const UserDashboard = ({ userId, approvedContent }) => {
                     );
                 })}
             </div>
-            
         </section>
     );
 };

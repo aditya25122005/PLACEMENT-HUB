@@ -4,8 +4,8 @@ const QuizQuestionSchema = new mongoose.Schema({
     topic: { 
         type: String, 
         required: true,
-        // Update topics to include all subjects for the systematic flow
-        enum: ['Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'] 
+       
+        // enum: ['Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'] 
     },
     questionText: { 
         type: String, 
@@ -17,7 +17,7 @@ const QuizQuestionSchema = new mongoose.Schema({
         required: true,
         validate: [v => v.length === 4, 'Quiz must have exactly 4 options.']
     },
-    // The index (0, 1, 2, or 3) of the correct answer
+    
     correctAnswer: { 
         type: Number, 
         required: true,
@@ -27,7 +27,7 @@ const QuizQuestionSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],
-        default: 'pending' // New questions need moderation too
+        default: 'pending'
     }
 }, { timestamps: true });
 

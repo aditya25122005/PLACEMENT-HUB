@@ -3,28 +3,31 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-const TOPICS_FOR_QUIZ = ['Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS']; 
+// NOTE: EditQuizModal import yahan nahi hai, woh QuizLibrary mein hai
 
-// Helper function to initialize the form state for a new question
-const initialFormState = {
-    topic: 'Aptitude',
-    questionText: '',
-    options: ['', '', '', ''], // Always 4 options
-    correctAnswer: 0, // Index 0 is the default correct answer
-    isOfficial: false, // Checkbox to determine if status is 'approved' immediately
-};
-
-const QuizManagement = () => {
-    const [formData, setFormData] = useState(initialFormState);
+// Component signature now receives subjectList prop
+const QuizManagement = ({ onContentChange, subjectList }) => { // ✅ subjectList received
+    
+    // Helper function to initialize the form state for a new question
+    const initialFormState = {
+        topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', // Dynamic initial topic
+        questionText: '',
+        options: ['', '', '', ''], // Always 4 options
+        correctAnswer: 0, // Index 0 is the default correct answer
+        isOfficial: false, // Checkbox to determine if status is 'approved' immediately
+    };
+    
+    // State definitions
+    const [formData, setFormData] = useState(initialFormState); 
     const [pendingQuizzes, setPendingQuizzes] = useState([]);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // --- Core Data Fetching ---
+
+    // --- Core Data Fetching: Pending Quizzes ---
     const fetchPendingQuizzes = async () => {
         try {
-            // Hitting the GET /api/quiz/pending route
-            const response = await axios.get('/api/quiz/pending');
+            const response = await axios.get('/api/quiz/pending'); 
             setPendingQuizzes(response.data);
             setLoading(false);
         } catch (error) {
@@ -37,6 +40,7 @@ const QuizManagement = () => {
         fetchPendingQuizzes();
     }, []);
 
+
     // --- Handlers for Adding New Quiz ---
     const handleAddChange = (e, index) => {
         const { name, value, type, checked } = e.target;
@@ -48,7 +52,6 @@ const QuizManagement = () => {
         } else if (type === 'checkbox') {
             setFormData({ ...formData, [name]: checked });
         } else if (name === 'correctAnswer') {
-             // Radio buttons ki value string hoti hai, use number mein badalna zaroori hai
              setFormData({ ...formData, [name]: Number(value) });
         } else {
             setFormData({ ...formData, [name]: value });
@@ -60,11 +63,14 @@ const QuizManagement = () => {
         e.preventDefault();
         setMessage('');
 
-        // Prepare data for the POST /api/quiz/add route
+        if (formData.questionText.trim().length < 5) {
+             setMessage('❌ Question text is too short.');
+             return;
+        }
+
         const dataToSend = {
             ...formData,
             status: formData.isOfficial ? 'approved' : 'pending',
-            // correctAnswer already converted to Number in handleAddChange
         };
 
         try {
@@ -74,7 +80,6 @@ const QuizManagement = () => {
             fetchPendingQuizzes(); // Refresh the pending list
         } catch (error) {
             const errorMsg = error.response?.data?.message || '❌ Failed to add quiz question.';
-             // If the error message is too long (like from Mongo validation), simplify it
             const displayError = errorMsg.includes('must have exactly 4 options') 
                                  ? '❌ Error: Ensure all 4 options and a correct answer are selected.' 
                                  : errorMsg;
@@ -82,11 +87,13 @@ const QuizManagement = () => {
         }
     };
 
-    // --- Handlers for Quiz Moderation ---
+
+    // --- Handlers for Quiz Moderation (Approval/Rejection) ---
     const handleQuizApproval = async (id) => {
         try {
             await axios.put(`/api/quiz/approve/${id}`);
             fetchPendingQuizzes(); // Refresh the list
+            if (onContentChange) onContentChange(); // Notify App.jsx to refresh student view
             alert('✅ Quiz Approved! Now available for students.');
         } catch (error) {
             alert('❌ Failed to approve quiz.');
@@ -103,6 +110,7 @@ const QuizManagement = () => {
         }
     };
 
+
     // --- Render Logic ---
     return (
         <div className="quiz-management-container">
@@ -116,10 +124,11 @@ const QuizManagement = () => {
                 <p>Use this to create official, verified quiz content.</p>
                 <form onSubmit={handleAddSubmit} className="quiz-add-form">
                     
-                    {/* Topic and Status Selection */}
+                    {/* Topic Selection (Uses Dynamic List) */}
                     <label>Topic:</label>
                     <select name="topic" value={formData.topic} onChange={handleAddChange}>
-                        {TOPICS_FOR_QUIZ.map(t => <option key={t} value={t}>{t}</option>)}
+                        {/* ✅ FIX: Use dynamic subjectList prop */}
+                        {subjectList && subjectList.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                     
                     <label>Question Text (Required):</label>
@@ -168,7 +177,7 @@ const QuizManagement = () => {
             
             <hr style={{margin: '40px 0'}}/>
 
-            {/* SECTION 2: PENDING QUIZ MODERATION */}
+            {/* SECTION 2: PENDING QUIZ MODERATION - ADDED BACK! */}
             <div className="admin-moderate-section">
                 <h3>2. Verify Pending Quiz Submissions</h3>
                 {loading ? (
@@ -183,12 +192,9 @@ const QuizManagement = () => {
                                 {quiz.options.map((opt, idx) => (
                                     <li 
                                         key={idx} 
-                                        // FIX APPLIED HERE: Wrapped var() in quotes
-                                        style={{fontWeight: idx === quiz.correctAnswer ? 'bold' : 'normal', 
-                                                color: idx === quiz.correctAnswer ? 'var(--secondary-color)' : 'var(--text-dark)'}}
+                                        style={{fontWeight: idx === quiz.correctAnswer ? 'bold' : 'normal'}}
                                     >
                                         {opt} 
-                                        {/* Show correct answer only on the moderator screen */}
                                         {idx === quiz.correctAnswer && " (✅ Correct Answer)"}
                                     </li>
                                 ))}

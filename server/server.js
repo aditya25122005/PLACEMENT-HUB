@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const contentRoutes = require('./routes/contentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const quizRoutes = require('./routes/quizRoutes');  
+const subjectRoutes = require('./routes/subjectRoutes');
 // Load env variables
 dotenv.config({ path: './.env' });
 
@@ -21,6 +22,7 @@ app.use(cors()); // Allow cross-origin requests
 app.use('/api/content', contentRoutes);
 app.use('/api/auth', authRoutes); 
 app.use('/api/quiz', quizRoutes); 
+app.use('/api/subjects', subjectRoutes);
 
 // Simple Test Route
 app.get('/', (req, res) => {

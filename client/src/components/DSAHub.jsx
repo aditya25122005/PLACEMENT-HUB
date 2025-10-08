@@ -88,7 +88,7 @@ const handleToggleSolve = async (problemId) => {
                             
                             <div className="problem-actions">
                                 <a href={problem.dsaProblemLink} target="_blank" rel="noopener noreferrer" className="dsa-btn primary">
-                                    Solve on Platform
+                                    Solve 
                                 </a>
                                 <a href={problem.youtubeSolutionLink} target="_blank" rel="noopener noreferrer" className="dsa-btn secondary">
                                     Solution

@@ -6,34 +6,22 @@ import QuizComponent from './QuizComponent';
 import YouTube from 'react-youtube'; // For video playback
 import '../App.css'; 
 
-// --- Helper Functions for Data Segregation (CRITICAL) ---
-
-// DSA links के लिए helper function:
 const getDsaContent = (content) => content.filter(item => item.dsaProblemLink);
 
-// Video resources के लिए helper function:
 const getVideoResources = (content) => content.filter(item => item.youtubeEmbedLink);
 
-// CRITICAL FIX: Study Material (Theory/Notes) के लिए Helper Function
-// आइटम को तभी थ्योरी मानें जब उसमें DSA लिंक और VIDEO लिंक दोनों मौजूद न हों।
 const getStudyMaterial = (content) => content.filter(item => 
     !item.dsaProblemLink && 
     !item.youtubeEmbedLink
 );
 
-
-// Component Signature: userId prop को receive करना ज़रोरी है
 const TopicPage = ({ topicName, content, userId }) => {
-    // State to manage the tab view: 'study', 'quiz', 'dsa', 'resources'
     const [activeTab, setActiveTab] = useState('study');
 
     // Filter content into three distinct groups
     const studyMaterial = getStudyMaterial(content);
     const dsaContent = getDsaContent(content);
     const videoResources = getVideoResources(content);
-
-
-    // --- Core Video Click Handler (Marks video as watched) ---
     const handleVideoClick = async (contentId) => {
         try {
             // Hitting the API to mark content as watched
@@ -44,9 +32,6 @@ const TopicPage = ({ topicName, content, userId }) => {
             console.error("Failed to mark video watched:", error);
         }
     };
-
-
-    // Render Study Material Section
     const renderStudyMaterial = () => (
         <div className="study-material-section">
             <h3>📖 Theory & Explanations ({studyMaterial.length} Items)</h3>
@@ -55,7 +40,7 @@ const TopicPage = ({ topicName, content, userId }) => {
             ) : (
                 studyMaterial.map(item => (
                     <div key={item._id} className="study-item-card">
-                        {/* ⚠️ FIX: If question_text is empty (video-only submission), hide the tag */}
+                      
                         {item.question_text && <p><strong>{item.question_text}</strong></p>}
                         
                         <details>
@@ -159,7 +144,7 @@ const TopicPage = ({ topicName, content, userId }) => {
                     className={activeTab === 'dsa' ? 'active-tab-btn' : ''} 
                     onClick={() => setActiveTab('dsa')}
                 >
-                    DSA Problems
+                    Practice Problems
                 </button>
                 {/* ✅ BEST RESOURCES TAB */}
                 <button 

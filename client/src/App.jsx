@@ -5,12 +5,8 @@ import AuthScreen from './components/AuthScreen';
 import ContentSubmissionForm from './components/ContentSubmissionForm';
 import TopicPage from './components/TopicPage'; 
 import UserDashboard from './components/UserDashboard'; 
-import DSAHub from './components/DSAHub'; // NEW IMPORT for dedicated DSA page
+import DSAHub from './components/DSAHub'; 
 import './App.css'; 
-
-// ✅ FINALIZED TOPICS LIST: DSA is now separate, Core CS is split into components.
-const TOPICS = ['Aptitude', 'DSA-PLAN','HR', 'OS', 'DBMS', 'CN', 'REACT JS']; 
-
 // Helper function to group content by topic
 const groupContentByTopic = (contentArray) => {
     return contentArray.reduce((acc, content) => {
@@ -41,9 +37,10 @@ const App = () => {
     const [approvedContent, setApprovedContent] = useState([]);
     const [groupedContent, setGroupedContent] = useState({}); 
     const [selectedTopic, setSelectedTopic] = useState(null); 
-    // ✅ NEW STATE: DSA Hub toggle
     const [isDSAHubActive, setIsDSAHubActive] = useState(false); 
 
+    // ✅ NEW STATE: Dynamic list of subjects fetched from DB
+    const [subjectList, setSubjectList] = useState([]);
 
     // --- Core Function: Fetch Approved Content ---
     const fetchApprovedContent = async () => {
@@ -70,13 +67,34 @@ const App = () => {
 
     // --- INITIAL EFFECT: Load Content & Check Role ---
     useEffect(() => {
-        fetchApprovedContent();
+        // 1. Subject Fetching Logic
+    const fetchSubjects = async () => {
+        try {
+            const response = await axios.get('/api/subjects/all');
+            
+            // ✅ CRITICAL FIX: Filter out the 'All' subject received from backend, 
+            // because 'All' is only for filtering dropdowns, not for dashboard cards.
+            setSubjectList(
+                response.data
+                    .filter(s => s.name !== 'All') // <-- ONLY ALLOW REAL SUBJECTS HERE
+                    .map(s => s.name)
+            ); 
+        } catch (error) {
+            console.error("Failed to fetch subject list:", error.message);
+        }
+    };
         
+        // Check role setup
         if (userInfo && userInfo.role === 'moderator') {
             setIsModerator(true);
         } else {
             setIsModerator(false);
         }
+
+        // Call all data fetching functions
+        fetchSubjects();
+        fetchApprovedContent(); 
+        
     }, [userInfo]); 
 
     
@@ -106,6 +124,7 @@ const App = () => {
                 </header>
                 <AdminDashboard 
                     onContentApprovedOrAdded={fetchApprovedContent} 
+                    subjectList={subjectList} // ✅ PROP PASSED TO ADMIN DASHBOARD
                 /> 
             </div>
         );
@@ -163,9 +182,9 @@ const App = () => {
             
             {/* 1. VISUAL DASHBOARD SECTION */}
             <UserDashboard
-             userId={userInfo._id} 
-             approvedContent={approvedContent} 
-
+                userId={userInfo._id} 
+                approvedContent={approvedContent} 
+                subjectList={subjectList} // ✅ PROP PASSED
             /> 
 
             {/* 2. TOPIC SELECTION SECTION */}
@@ -173,14 +192,15 @@ const App = () => {
                 <h2>Choose a Topic to Start Your Systematic Prep</h2>
                 
                 <div className="topics-cards-container">
-                    {TOPICS.map(topic => (
+                    {/* ✅ FIX: Use dynamic subjectList */}
+                    {subjectList.map(topicName => (
                         <div 
-                            key={topic} 
+                            key={topicName} 
                             className="topic-card-summary" 
-                            onClick={() => setSelectedTopic(topic)}
+                            onClick={() => setSelectedTopic(topicName)}
                         >
-                            <h3 className="card-title">{topic}</h3>
-                            <p>{groupedContent[topic] ? groupedContent[topic].length : 0} Verified Items</p>
+                            <h3 className="card-title">{topicName}</h3>
+                            <p>{groupedContent[topicName] ? groupedContent[topicName].length : 0} Verified Items</p>
                             <span className="topic-action-tag">Click to View & Practice →</span>
                         </div>
                     ))}
@@ -189,7 +209,10 @@ const App = () => {
             
             {/* 3. SUBMISSION SECTION */}
             <section className="submission-section">
-                <ContentSubmissionForm onSubmissionSuccess={fetchApprovedContent} />
+                <ContentSubmissionForm 
+                    onSubmissionSuccess={fetchApprovedContent} 
+                    subjectList={subjectList} // ✅ PROP PASSED
+                />
             </section>
             
         </div>

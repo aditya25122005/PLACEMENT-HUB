@@ -4,14 +4,16 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css'; 
 
-// Topics list जो App.jsx और Content.js से match करती है
-const ALL_TOPICS = ['Aptitude', 'DSA', 'DSA-PLAN','HR', 'OS', 'DBMS', 'CN','REACT JS'];
+// ❌ NOTE: The hardcoded ALL_TOPICS array has been removed. 
+// Data is now sourced from the 'subjectList' prop.
 
-const OfficialContentForm = ({ onContentAdded }) => {
+// Component Signature: Now receives subjectList prop
+const OfficialContentForm = ({ onContentAdded, subjectList }) => { 
+    
     // State to manage the form inputs
     const [formData, setFormData] = useState({
-        topic: 'Aptitude',
-        question_text: '', // Problem/Concept Title
+        topic: 'Aptitude', // Initial value assumes Aptitude exists in the list
+        question_text: '', 
         videoTitle: '',    // New dedicated title field
         explanation: '',   // Internal Solution/Explanation
         dsaProblemLink: '',
@@ -20,23 +22,16 @@ const OfficialContentForm = ({ onContentAdded }) => {
     });
     
     const [message, setMessage] = useState('');
-    
-    // ✅ FIX 1: Only use isSubmitting for the loading state (isSaving is removed)
     const [isSubmitting, setIsSubmitting] = useState(false); 
+
+    // Helper function to extract the clean YouTube ID (Remains the same)
     const extractYouTubeID = (url) => {
-        // Regex to match both watch?v=ID and embed/ID formats
         const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?feature=player_embedded&v=|watch\?v=))([^&?/\n]+)/);
-        
-        // Fallback for clean embed URLs
         if (match) return match[1];
-        
-        // Check for clean embed URL format (e.g., .../embed/ID)
         const embedMatch = url.match(/\/embed\/([^/?]+)/);
         if (embedMatch) return embedMatch[1];
-        
-        return url; // Return original if not recognized
+        return url; 
     };
-
 
 
     // Handles input changes (Including the CRITICAL auto-extraction logic)
@@ -46,39 +41,35 @@ const OfficialContentForm = ({ onContentAdded }) => {
 
         // Auto-extraction logic for the iframe tag
         if (name === 'youtubeEmbedLink') {
-            // If the user pastes a full iframe, extract the src first
-        const iframeMatch = value.match(/src="([^"]+)"/);
-        const urlToProcess = iframeMatch ? iframeMatch[1] : value;
-        
-        // Extract the clean video ID
-        finalValue = extractYouTubeID(urlToProcess); 
+            const iframeMatch = value.match(/src="([^"]+)"/);
+            const urlToProcess = iframeMatch ? iframeMatch[1] : value;
+            
+            // Extract the clean video ID
+            finalValue = extractYouTubeID(urlToProcess); 
         }
         
         setFormData({ ...formData, [name]: finalValue });
     };
 
-    
-
     // Handles form submission to the OFFICIAL route
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Basic validation: Title and Topic must always be present
-        if ( !formData.topic) {
+        // Basic validation: Topic must always be present
+        if (!formData.topic) {
             setMessage('❌ Topic Category is required.');
             return;
         }
 
-        // 🎯 CRITICAL FIX 2: CONDITIONAL VALIDATION LOGIC
-        // Check if ANY content body exists (link OR explanation)
+        // CRITICAL FIX: CONDITIONAL VALIDATION LOGIC
         const isContentBodyMissing = (
+            !formData.question_text && 
             !formData.explanation && 
             !formData.dsaProblemLink && 
             !formData.youtubeSolutionLink &&
             !formData.youtubeEmbedLink
         );
 
-        // Check if Video Title is missing when a Video Embed Link is present
         const isVideoTitleMissing = (
             !!formData.youtubeEmbedLink && !formData.videoTitle
         );
@@ -92,7 +83,6 @@ const OfficialContentForm = ({ onContentAdded }) => {
             setMessage('❌ If you provide an Embed Link, the Video Title is required.');
             return;
         }
-        // End of Critical Fix
 
         setIsSubmitting(true);
         setMessage('');
@@ -104,9 +94,10 @@ const OfficialContentForm = ({ onContentAdded }) => {
             
             // Reset the form
             setFormData({
-                topic: 'Aptitude',
+                // Use the first subject from the dynamic list as default for reset
+                topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', 
                 question_text: '',
-                videoTitle: '', // Reset new field
+                videoTitle: '',
                 explanation: '',
                 dsaProblemLink: '',
                 youtubeSolutionLink: '',
@@ -117,7 +108,6 @@ const OfficialContentForm = ({ onContentAdded }) => {
 
         } catch (error) {
             console.error('Submission error:', error);
-            // This error occurs if backend validation is still too strict. We rely on the fix applied in contentRoutes.js
             const errorMsg = error.response?.data?.message || '❌ Failed to add official content. Check server console.';
             setMessage(errorMsg);
         } finally {
@@ -132,16 +122,19 @@ const OfficialContentForm = ({ onContentAdded }) => {
             
             <form onSubmit={handleSubmit} className="official-form">
                 
-                {/* Topic and Title (REQUIRED) */}
+                {/* Topic (REQUIRED) - Now uses dynamic prop */}
                 <label>Topic Category:</label>
                 <select name="topic" value={formData.topic} onChange={handleChange} required>
-                    {ALL_TOPICS.map(t => (<option key={t} value={t}>{t}</option>))}
+                    {/* ✅ FIX APPLIED: Using dynamic subjectList prop */}
+                    {subjectList && subjectList.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                    ))}
+                    {!subjectList || subjectList.length === 0 && <option value="">Loading Subjects...</option>}
                 </select>
 
                 <label>Problem/Concept Title:</label>
-                <textarea name="question_text" value={formData.question_text} onChange={handleChange} placeholder="Enter the main problem statement or theory title." rows="2"  />
+                <textarea name="question_text" value={formData.question_text} onChange={handleChange} placeholder="Enter the main problem statement or theory title. (Optional for video-only)" rows="2" />
 
-                {/* Explanation (NOW OPTIONAL in Frontend) */}
                 <label>Internal Solution / Detailed Concepts:</label>
                 <textarea 
                     name="explanation" 
@@ -149,7 +142,6 @@ const OfficialContentForm = ({ onContentAdded }) => {
                     onChange={handleChange} 
                     placeholder="Enter the step-by-step solution, algorithm, or full explanation." 
                     rows="4" 
-                    // No 'required' attribute, relies on conditional check
                 />
                 
                 <hr style={{margin: '20px 0'}}/> 
