@@ -36,24 +36,23 @@ const DSAHub = ({ userId }) => {
 
 
     // 2. Handler to Mark Problem as Solved/Unsolved
-    const handleToggleSolve = async (problemId) => {
-        const isSolved = solvedStatus.includes(problemId);
+const handleToggleSolve = async (problemId) => {
+    const isCurrentlySolved = solvedStatus.includes(problemId);
+    
+    try {
+        // Hitting the new PUT /api/auth/solve-dsa/:userId route
+        const response = await axios.put(`/api/auth/solve-dsa/${userId}`, { 
+            problemId: problemId,
+            isSolved: isCurrentlySolved 
+        });
+        setSolvedStatus(response.data.solvedDSA);
         
-        try {
-            // API call for tracking solved status (This route needs implementation)
-            // For now, we update the frontend state for visual feedback
-            
-            // Frontend state update
-            if (isSolved) {
-                setSolvedStatus(solvedStatus.filter(id => id !== problemId));
-            } else {
-                setSolvedStatus([...solvedStatus, problemId]);
-            }
-        } catch (error) {
-            console.error("Failed to update solved status:", error);
-            alert("Failed to update status. Please try again.");
-        }
-    };
+        
+    } catch (error) {
+        console.error("Failed to update solved status:", error);
+        alert("Failed to update status. Please try again.");
+    }
+};
 
     if (loading) {
         return <h1 style={{ textAlign: 'center', marginTop: '50px' }}>Loading DSA Hub... ⏳</h1>;

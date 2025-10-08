@@ -90,4 +90,32 @@ router.put('/watch-content/:userId', async (req, res) => {
         res.status(500).json({ message: 'Failed to mark content as watched.' });
     }
 });
+// 5. PUT /api/auth/solve-dsa/:userId: Marks a problem as solved/unsolved
+router.put('/solve-dsa/:userId', async (req, res) => {
+    const { problemId, isSolved } = req.body; // Frontend se status aayega
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (isSolved) {
+            // Remove the ID (Mark as Unsolved)
+            user.solvedDSA = user.solvedDSA.filter(id => id !== problemId);
+        } else {
+            // Add the ID (Mark as Solved) - only if not already present
+            if (!user.solvedDSA.includes(problemId)) {
+                user.solvedDSA.push(problemId);
+            }
+        }
+        
+        // CRITICAL FIX: Mark array as modified for Mongoose to save changes
+        user.markModified('solvedDSA'); 
+        await user.save();
+        
+        // Updated array return करें
+        res.json({ message: 'Solved status updated.', solvedDSA: user.solvedDSA });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update solved status.' });
+    }
+});
 module.exports = router;
