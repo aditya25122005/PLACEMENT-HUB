@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-// Settings for the quiz
-const QUIZ_DURATION_SECONDS = 60; // 1 minute challenge for 5 questions
+const QUIZ_DURATION_SECONDS = 60;
 const QUIZ_SIZE = 5;
 
 const TimedQuiz = () => {
@@ -13,15 +12,9 @@ const TimedQuiz = () => {
     const [quizStarted, setQuizStarted] = useState(false);
     const [quizFinished, setQuizFinished] = useState(false);
     const timerRef = useRef();
-
-    // --- A. Fetch Questions ---
     const fetchQuestions = async () => {
         try {
-            // Hitting the new random quiz endpoint
             const response = await axios.get('/api/content/quiz');
-            
-            // NOTE: Since our approved content doesn't have multiple choice options, 
-            // we will treat this as a simple 'Did you know the answer?' challenge.
             setQuestions(response.data);
             setQuizStarted(false);
             setQuizFinished(false);
@@ -37,7 +30,6 @@ const TimedQuiz = () => {
         fetchQuestions();
     }, []);
 
-    // --- B. Timer Logic (The 'Timed' Part) ---
     useEffect(() => {
         if (quizStarted && timer > 0 && !quizFinished) {
             timerRef.current = setInterval(() => {
@@ -53,7 +45,6 @@ const TimedQuiz = () => {
         return () => clearInterval(timerRef.current);
     }, [quizStarted, timer, quizFinished]);
 
-    // --- C. Handle User Action (Simple Pass/Fail) ---
     const handleAnswer = (isCorrect) => {
         if (isCorrect) {
             setScore(prevScore => prevScore + 1);
@@ -69,8 +60,7 @@ const TimedQuiz = () => {
             setQuizFinished(true);
         }
     };
-    
-    // --- D. Render Logic ---
+
     const currentQuestion = questions[currentQuestionIndex];
 
     if (questions.length === 0) {
@@ -102,7 +92,6 @@ const TimedQuiz = () => {
         );
     }
 
-    // Main Quiz Interface
     return (
         <div className="quiz-container active-quiz">
             <h3 className="quiz-header">Question {currentQuestionIndex + 1} of {questions.length}</h3>

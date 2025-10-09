@@ -5,13 +5,13 @@ const QuizQuestionSchema = new mongoose.Schema({
         type: String, 
         required: true,
        
-        // enum: ['Aptitude', 'DSA-PLAN', 'HR', 'OS', 'DBMS', 'CN','REACT JS'] 
+        
     },
     questionText: { 
         type: String, 
         required: true 
     },
-    // MCQ Options: Array of 4 strings
+ 
     options: {
         type: [String], 
         required: true,

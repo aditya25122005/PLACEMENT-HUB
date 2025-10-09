@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const jwt = require('jsonwebtoken'); // Token generation ke liye
+const jwt = require('jsonwebtoken');
 
-// JWT Token generate karne ka function
 const generateToken = (id, role) => {
     return jwt.sign({ id, role }, process.env.JWT_SECRET, {
         expiresIn: '30d',
@@ -82,8 +81,6 @@ router.put('/watch-content/:userId', async (req, res) => {
             user.markModified('watchedContent');
             await user.save();
         }
-        
-        // Return updated list of watched IDs
         res.json({ watchedList: user.watchedContent }); 
 
     } catch (error) {
@@ -98,20 +95,19 @@ router.put('/solve-dsa/:userId', async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         if (isSolved) {
-            // Remove the ID (Mark as Unsolved)
+            
             user.solvedDSA = user.solvedDSA.filter(id => id !== problemId);
         } else {
-            // Add the ID (Mark as Solved) - only if not already present
+         
             if (!user.solvedDSA.includes(problemId)) {
                 user.solvedDSA.push(problemId);
             }
         }
         
-        // CRITICAL FIX: Mark array as modified for Mongoose to save changes
+       
         user.markModified('solvedDSA'); 
         await user.save();
-        
-        // Updated array return करें
+
         res.json({ message: 'Solved status updated.', solvedDSA: user.solvedDSA });
 
     } catch (error) {

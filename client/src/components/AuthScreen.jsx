@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css'; 
 import image from '../assets/image.jpg';
-// Helper function to save JWT token and user info to local storage
+
 const saveAuthData = (data) => {
     localStorage.setItem('userInfo', JSON.stringify(data));
-    // Refresh the window to signal App.jsx to load the new state
     window.location.reload(); 
 };
 
 const AuthScreen = () => {
-    const [isLogin, setIsLogin] = useState(true); // Login aur Register view toggle karne ke liye
+    const [isLogin, setIsLogin] = useState(true); 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -26,7 +25,6 @@ const AuthScreen = () => {
         try {
             const response = await axios.post(endpoint, { username, password });
             
-            // Success! Save user data (token, role)
             saveAuthData(response.data);
 
         } catch (error) {

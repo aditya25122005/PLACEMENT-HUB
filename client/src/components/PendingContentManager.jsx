@@ -2,15 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../App.css';
-// This component manages the verification queue for general study material (Theory, DSA links, etc.)
 const PendingContentManager = ({ onContentApproved }) => {
     const [pendingContent, setPendingContent] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    // 1. Fetch all PENDING content for general moderation
     const fetchPendingContent = async () => {
         try {
-            // Hitting the GET /api/content/pending route (This is the general content queue)
+            
             const response = await axios.get('/api/content/pending');
             setPendingContent(response.data);
             setLoading(false);
@@ -24,26 +21,23 @@ const PendingContentManager = ({ onContentApproved }) => {
         fetchPendingContent();
     }, []);
 
-    // 2. Handle Approval Action
     const handleApproval = async (id) => {
         try {
             await axios.put(`/api/content/approve/${id}`);
             
-            fetchPendingContent(); // Refresh the moderation list
-            onContentApproved(); // Notify the main App to refresh the student view
+            fetchPendingContent(); 
+            onContentApproved(); 
             
             alert('✅ Content Approved! It is now live.');
         } catch (error) {
             alert('❌ Failed to approve content.');
         }
     };
-    
-    // 3. Handle Rejection Action
     const handleRejection = async (id) => {
         try {
             await axios.put(`/api/content/reject/${id}`);
             
-            fetchPendingContent(); // Refresh the moderation list
+            fetchPendingContent();
             alert('❌ Content Rejected.');
         } catch (error) {
             alert('❌ Failed to reject content.');
@@ -54,8 +48,7 @@ const PendingContentManager = ({ onContentApproved }) => {
     if (loading) {
         return <h3 style={{ textAlign: 'center' }}>Loading Pending Submissions...</h3>;
     }
-
-    // 4. Render the Pending List
+    
     return (
         <div className="pending-manager-container">
             <h3>Verify Student Submissions (Study Material & DSA)</h3>

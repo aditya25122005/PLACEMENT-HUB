@@ -6,7 +6,6 @@ const Subject = require('../models/Subject');
 router.get('/all', async (req, res) => {
     try {
         const subjects = await Subject.find().sort({ name: 1 });
-        // We add 'All' manually for the filter dropdowns, but it's not saved to DB
         const allSubjects = [{ name: 'All' }, ...subjects]; 
         res.json(allSubjects);
     } catch (error) {

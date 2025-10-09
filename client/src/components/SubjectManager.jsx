@@ -1,8 +1,6 @@
-// client/src/components/SubjectManager.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../App.css'; // For general styling
+import '../App.css';
 
 const SubjectManager = ({ onSubjectsUpdated }) => {
     const [subjects, setSubjects] = useState([]);
@@ -10,15 +8,11 @@ const SubjectManager = ({ onSubjectsUpdated }) => {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-
-    // 1. Fetch Subjects on Component Load
     const fetchSubjects = async () => {
         setLoading(true);
         try {
-            // Hitting the GET /api/subjects/all route
             const response = await axios.get('/api/subjects/all');
-            // NOTE: The API returns the subjects array (objects with _id and name)
-            setSubjects(response.data.filter(s => s.name !== 'All')); // Filter out 'All' if it exists
+            setSubjects(response.data.filter(s => s.name !== 'All')); 
             setLoading(false);
         } catch (error) {
             setMessage('❌ Failed to fetch subjects.');
@@ -30,7 +24,7 @@ const SubjectManager = ({ onSubjectsUpdated }) => {
         fetchSubjects();
     }, []);
 
-    // 2. Add New Subject Handler
+
     const handleAdd = async (e) => {
         e.preventDefault();
         const name = newSubjectName.trim();
@@ -43,12 +37,10 @@ const SubjectManager = ({ onSubjectsUpdated }) => {
         setMessage('');
 
         try {
-            // Hitting the POST /api/subjects/add route
+          
             await axios.post('/api/subjects/add', { name });
             setNewSubjectName('');
             setMessage(`✅ Subject "${name}" added successfully!`);
-            
-            // Refresh local list and notify App.jsx (to refresh all topic dropdowns)
             fetchSubjects(); 
             if (onSubjectsUpdated) onSubjectsUpdated(); 
 
@@ -60,18 +52,17 @@ const SubjectManager = ({ onSubjectsUpdated }) => {
         }
     };
 
-    // 3. Delete Subject Handler
     const handleDelete = async (id, name) => {
         if (!window.confirm(`Are you sure you want to permanently delete subject "${name}"? This will break content and quizzes related to it!`)) {
             return;
         }
 
         try {
-            // Hitting the DELETE /api/subjects/:id route
+            
             await axios.delete(`/api/subjects/${id}`);
             setMessage(`✅ Subject "${name}" deleted.`);
             
-            // Refresh local list and notify App.jsx
+            
             fetchSubjects(); 
             if (onSubjectsUpdated) onSubjectsUpdated(); 
 
@@ -87,7 +78,7 @@ const SubjectManager = ({ onSubjectsUpdated }) => {
 
     return (
         <div className="subject-manager-container admin-tab-content-card">
-            {/* 🎯 SECTION 1: ADD NEW SUBJECT FORM */}
+          
             <h3 style={{ borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>1. Add New Subject Category</h3>
             {message && <p className={`submission-message ${message.startsWith('✅') ? 'success' : 'error'}`}>{message}</p>}
 
@@ -106,7 +97,7 @@ const SubjectManager = ({ onSubjectsUpdated }) => {
                 </button>
             </form>
             
-            {/* 🎯 SECTION 2: CURRENT SUBJECT LIST */}
+           
             <h3 style={{ marginTop: '40px', borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>
                 2. Current Live Subjects ({subjects.length})
             </h3>

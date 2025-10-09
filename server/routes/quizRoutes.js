@@ -1,5 +1,3 @@
-// server/routes/quizRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const QuizQuestion = require('../models/QuizQuestion');
@@ -26,8 +24,6 @@ router.post('/submit-answers', async (req, res) => {
     try {
         const questionIds = Object.keys(answers);
         const correctQuestions = await QuizQuestion.find({ _id: { $in: questionIds } });
-
-        // Score calculation logic
         correctQuestions.forEach(q => {
             const submittedIndex = answers[q._id.toString()];
             if (submittedIndex === q.correctAnswer) {
@@ -35,38 +31,33 @@ router.post('/submit-answers', async (req, res) => {
             }
         });
 
-        // **Dashboard Update Logic (Guaranteed Save)**
+       
         if (userId) { 
             const user = await User.findById(userId);
             if (user) {
-                // Find the index to locate the exact score sub-document
+                
                 const topicIndex = user.scores.findIndex(s => s.topic === topic);
 
                 if (topicIndex === -1) {
-                    // Case 1: Topic score does not exist (Create New Entry)
+                
                     user.scores.push({ 
                         topic, 
                         highScore: score, 
-                        lastScore: score, // Initialize both high and last score
+                        lastScore: score, 
                         lastAttempt: Date.now() 
                     });
                 } else {
-                    // Case 2: Topic score exists (Update existing score)
-                    
-                    // Access the sub-document element directly via index
                     const scoreEntry = user.scores[topicIndex]; 
 
-                    // Update High Score Logic
+                 
                     if (score > scoreEntry.highScore) { 
                         scoreEntry.highScore = score;
                     }
                     
-                    // ✅ FIX: Update lastScore and lastAttempt
+            
                     scoreEntry.lastScore = score; 
                     scoreEntry.lastAttempt = Date.now();
 
-                    // ⚠️ CRITICAL FIX: Mark the 'scores' array as modified 
-                    // This guarantees Mongoose saves the change to the nested array
                     user.markModified('scores'); 
                 }
                 
@@ -151,7 +142,7 @@ router.get('/all-dsa', async (req, res) => {
         })
         res.json(dsaMaterial);
     } catch (error) {
-        // Log the actual server error to the console for better debugging
+      
         console.error("SERVER ERROR fetching all DSA:", error);
         res.status(500).json({ message: 'Failed to fetch centralized DSA material.' });
     }
@@ -161,7 +152,7 @@ router.get('/all-dsa', async (req, res) => {
 // 8. GET /api/quiz/all: Get ALL Quiz Questions (Approved, Pending, Rejected)
 router.get('/all', async (req, res) => {
     try {
-        // Fetch ALL quiz questions without excluding the correct answer
+     
         const allQuizzes = await QuizQuestion.find().sort({ createdAt: -1 });
         res.json(allQuizzes);
     } catch (error) {
@@ -174,7 +165,7 @@ router.put('/:id', async (req, res) => {
     try {
         const updatedQuiz = await QuizQuestion.findByIdAndUpdate(
             req.params.id,
-            { $set: req.body }, // $set updates only the fields sent in req.body
+            { $set: req.body }, 
             { new: true, runValidators: true } 
         );
         if (!updatedQuiz) {

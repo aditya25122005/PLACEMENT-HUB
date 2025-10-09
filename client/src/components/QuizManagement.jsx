@@ -1,30 +1,21 @@
-// client/src/components/QuizManagement.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-// NOTE: EditQuizModal import yahan nahi hai, woh QuizLibrary mein hai
 
-// Component signature now receives subjectList prop
-const QuizManagement = ({ onContentChange, subjectList }) => { // ✅ subjectList received
+const QuizManagement = ({ onContentChange, subjectList }) => { 
     
-    // Helper function to initialize the form state for a new question
     const initialFormState = {
-        topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', // Dynamic initial topic
+        topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', 
         questionText: '',
-        options: ['', '', '', ''], // Always 4 options
-        correctAnswer: 0, // Index 0 is the default correct answer
-        isOfficial: false, // Checkbox to determine if status is 'approved' immediately
+        options: ['', '', '', ''], 
+        correctAnswer: 0,
+        isOfficial: false, 
     };
-    
-    // State definitions
     const [formData, setFormData] = useState(initialFormState); 
     const [pendingQuizzes, setPendingQuizzes] = useState([]);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
-
-    // --- Core Data Fetching: Pending Quizzes ---
     const fetchPendingQuizzes = async () => {
         try {
             const response = await axios.get('/api/quiz/pending'); 
@@ -41,7 +32,7 @@ const QuizManagement = ({ onContentChange, subjectList }) => { // ✅ subjectLis
     }, []);
 
 
-    // --- Handlers for Adding New Quiz ---
+
     const handleAddChange = (e, index) => {
         const { name, value, type, checked } = e.target;
 
@@ -88,12 +79,12 @@ const QuizManagement = ({ onContentChange, subjectList }) => { // ✅ subjectLis
     };
 
 
-    // --- Handlers for Quiz Moderation (Approval/Rejection) ---
+ 
     const handleQuizApproval = async (id) => {
         try {
             await axios.put(`/api/quiz/approve/${id}`);
-            fetchPendingQuizzes(); // Refresh the list
-            if (onContentChange) onContentChange(); // Notify App.jsx to refresh student view
+            fetchPendingQuizzes(); 
+            if (onContentChange) onContentChange(); 
             alert('✅ Quiz Approved! Now available for students.');
         } catch (error) {
             alert('❌ Failed to approve quiz.');
@@ -103,31 +94,28 @@ const QuizManagement = ({ onContentChange, subjectList }) => { // ✅ subjectLis
     const handleQuizRejection = async (id) => {
         try {
             await axios.put(`/api/quiz/reject/${id}`);
-            fetchPendingQuizzes(); // Refresh the list
+            fetchPendingQuizzes(); 
             alert('❌ Quiz Rejected.');
         } catch (error) {
             alert('❌ Failed to reject quiz.');
         }
     };
 
-
-    // --- Render Logic ---
     return (
         <div className="quiz-management-container">
-            {/* Display status messages */}
+        
             {message && <p className={`submission-message ${message.startsWith('✅') ? 'success' : 'error'}`} style={{marginBottom: '20px'}}>{message}</p>}
 
 
-            {/* SECTION 1: ADD NEW QUIZ FORM */}
+           
             <div className="admin-add-section">
                 <h3>1. Add New MCQ Question</h3>
                 <p>Use this to create official, verified quiz content.</p>
                 <form onSubmit={handleAddSubmit} className="quiz-add-form">
                     
-                    {/* Topic Selection (Uses Dynamic List) */}
                     <label>Topic:</label>
                     <select name="topic" value={formData.topic} onChange={handleAddChange}>
-                        {/* ✅ FIX: Use dynamic subjectList prop */}
+                  
                         {subjectList && subjectList.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                     
@@ -176,8 +164,6 @@ const QuizManagement = ({ onContentChange, subjectList }) => { // ✅ subjectLis
             </div>
             
             <hr style={{margin: '40px 0'}}/>
-
-            {/* SECTION 2: PENDING QUIZ MODERATION - ADDED BACK! */}
             <div className="admin-moderate-section">
                 <h3>2. Verify Pending Quiz Submissions</h3>
                 {loading ? (

@@ -1,23 +1,17 @@
-// client/src/components/EditQuizModal.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../App.css'; // For modal styling
+import '../App.css'; 
 
-// Topics list (Must match QuizQuestion.js enum)
 const ALL_TOPICS = ['Aptitude', 'DSA', 'HR', 'OS', 'DBMS', 'CN', 'Core CS', 'React JS'];
 const STATUSES = ['approved', 'pending', 'rejected'];
 
 const EditQuizModal = ({ isOpen, onClose, quizData }) => {
-    // Modal सिर्फ तभी रेंडर होगा जब isOpen true हो
+    
     if (!isOpen || !quizData) return null;
-
-    // Form state ko initial quiz data se initialize karein
     const [formData, setFormData] = useState(quizData);
     const [message, setMessage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
-    // useEffect to reset form when new quizData is loaded
     useEffect(() => {
         setFormData(quizData);
         setMessage('');
@@ -28,12 +22,11 @@ const EditQuizModal = ({ isOpen, onClose, quizData }) => {
         const { name, value } = e.target;
         
         if (name === 'options') {
-            // Options array ko index ke through update karna
             const newOptions = [...formData.options];
             newOptions[index] = value;
             setFormData({ ...formData, options: newOptions });
         } else if (name === 'correctAnswer') {
-             // correct answer index ko number mein update karna
+             
             setFormData({ ...formData, [name]: Number(value) });
         } else {
             setFormData({ ...formData, [name]: value });
@@ -45,7 +38,6 @@ const EditQuizModal = ({ isOpen, onClose, quizData }) => {
         setMessage('');
         setIsSaving(true);
         
-        // Final validation check for 4 options and correct answer index
         if (formData.options.some(opt => opt.trim() === '') || formData.options.length !== 4) {
              setMessage('❌ Please ensure all 4 options are filled.');
              setIsSaving(false);
@@ -53,20 +45,19 @@ const EditQuizModal = ({ isOpen, onClose, quizData }) => {
         }
 
         try {
-            // Hitting the PUT /api/quiz/:id route (The 'U' in CRUD)
+           
             const dataToSave = {
                 ...formData,
-                // Mongoose ko array update karne ke liye sirf zaroori fields bhejein
+               
                 options: formData.options, 
                 correctAnswer: Number(formData.correctAnswer),
-                // _id field ko API mein nahi bhejna chahiye, woh URL mein jaata hai
+               
             };
 
             await axios.put(`/api/quiz/${quizData._id}`, dataToSave);
 
             setMessage('✅ Quiz Updated Successfully!');
-            
-            // Close modal after successful update and refresh
+    
             setTimeout(() => {
                 onClose(); 
             }, 800);
@@ -80,7 +71,7 @@ const EditQuizModal = ({ isOpen, onClose, quizData }) => {
     };
 
     return (
-        // Modal Backdrop (Using the CSS styles added earlier)
+       
         <div className="modal-backdrop">
             <div className="modal-content">
                 <h3>✏️ Edit Quiz: {quizData.topic}</h3>

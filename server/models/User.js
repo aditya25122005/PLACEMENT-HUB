@@ -1,8 +1,6 @@
-// server/models/User.js
-
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // Password hashing ke liye
-// Score tracking ke liye ek naya sub-schema add karte hain
+const bcrypt = require('bcryptjs'); 
+
 const ScoreSchema = new mongoose.Schema({
     topic: { type: String, required: true },
     highScore: { type: Number, default: 0 },
@@ -19,14 +17,13 @@ const UserSchema = new mongoose.Schema({
         enum: ['student', 'moderator'], 
         default: 'student' 
     },
-    // NEW: Dashboard ke liye scores
+   
     scores: [ScoreSchema],
     solvedDSA: [{ type: String }], 
     watchedContent: [{ type: String }], 
 
 }, { timestamps: true });
 
-// Middleware: Password ko save karne se pehle hash karna
 UserSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
@@ -36,7 +33,6 @@ UserSchema.pre('save', async function (next) {
     next();
 });
 
-// Login ke liye password compare karne ka method
 UserSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };

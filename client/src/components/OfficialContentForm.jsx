@@ -1,21 +1,13 @@
-// client/src/components/OfficialContentForm.jsx
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-
-// ❌ NOTE: The hardcoded ALL_TOPICS array has been removed. 
-// Data is now sourced from the 'subjectList' prop.
-
-// Component Signature: Now receives subjectList prop
 const OfficialContentForm = ({ onContentAdded, subjectList }) => { 
     
-    // State to manage the form inputs
     const [formData, setFormData] = useState({
-        topic: 'Aptitude', // Initial value assumes Aptitude exists in the list
+        topic: 'Aptitude', 
         question_text: '', 
-        videoTitle: '',    // New dedicated title field
-        explanation: '',   // Internal Solution/Explanation
+        videoTitle: '',   
+        explanation: '', 
         dsaProblemLink: '',
         youtubeSolutionLink: '',
         youtubeEmbedLink: '', 
@@ -23,8 +15,6 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
     
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false); 
-
-    // Helper function to extract the clean YouTube ID (Remains the same)
     const extractYouTubeID = (url) => {
         const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?feature=player_embedded&v=|watch\?v=))([^&?/\n]+)/);
         if (match) return match[1];
@@ -32,36 +22,27 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
         if (embedMatch) return embedMatch[1];
         return url; 
     };
-
-
-    // Handles input changes (Including the CRITICAL auto-extraction logic)
     const handleChange = (e) => {
         const { name, value } = e.target;
         let finalValue = value;
-
-        // Auto-extraction logic for the iframe tag
         if (name === 'youtubeEmbedLink') {
             const iframeMatch = value.match(/src="([^"]+)"/);
             const urlToProcess = iframeMatch ? iframeMatch[1] : value;
             
-            // Extract the clean video ID
             finalValue = extractYouTubeID(urlToProcess); 
         }
         
         setFormData({ ...formData, [name]: finalValue });
     };
 
-    // Handles form submission to the OFFICIAL route
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Basic validation: Topic must always be present
         if (!formData.topic) {
             setMessage('❌ Topic Category is required.');
             return;
         }
 
-        // CRITICAL FIX: CONDITIONAL VALIDATION LOGIC
         const isContentBodyMissing = (
             !formData.question_text && 
             !formData.explanation && 
@@ -91,10 +72,9 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
             await axios.post('/api/content/add-official', formData);
 
             setMessage('✅ Official Content Added Successfully! It is immediately live.');
-            
-            // Reset the form
+
             setFormData({
-                // Use the first subject from the dynamic list as default for reset
+              
                 topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', 
                 question_text: '',
                 videoTitle: '',
@@ -122,10 +102,9 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
             
             <form onSubmit={handleSubmit} className="official-form">
                 
-                {/* Topic (REQUIRED) - Now uses dynamic prop */}
                 <label>Topic Category:</label>
                 <select name="topic" value={formData.topic} onChange={handleChange} required>
-                    {/* ✅ FIX APPLIED: Using dynamic subjectList prop */}
+                
                     {subjectList && subjectList.map(t => (
                         <option key={t} value={t}>{t}</option>
                     ))}
@@ -146,10 +125,9 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
                 
                 <hr style={{margin: '20px 0'}}/> 
                 
-                {/* External Resources */}
                 <h4>Optional: Video & External Resources</h4>
                 
-                {/* Video Title - REQUIRED IF EMBED LINK IS PRESENT */}
+             
                 <label>Video Title (Required if using Embed Link):</label>
                 <input 
                     type="text" 

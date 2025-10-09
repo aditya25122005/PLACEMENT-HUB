@@ -14,7 +14,6 @@ import "../App.css";
 
 const MAX_QUIZ_SCORE = 5;
 
-// Helper function to render the circular progress ring
 const renderProgressRing = (percentage, color) => {
   const radius = 25;
   const circumference = 2 * Math.PI * radius;
@@ -68,7 +67,6 @@ const UserDashboard = ({ userId, approvedContent, subjectList }) => {
       try {
         const contentSource = Array.isArray(approvedContent) ? approvedContent : [];
 
-        // ✅ FIXED LINE: use backticks for template literal
         const userResponse = await axios.get(`/api/auth/profile/${userId}`);
         const userData = userResponse.data;
 
