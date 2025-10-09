@@ -6,7 +6,9 @@ const bcrypt = require('bcryptjs'); // Password hashing ke liye
 const ScoreSchema = new mongoose.Schema({
     topic: { type: String, required: true },
     highScore: { type: Number, default: 0 },
+    lastScore: { type: Number, default: 0 },
     lastAttempt: { type: Date, default: Date.now },
+    
 });
 
 const UserSchema = new mongoose.Schema({

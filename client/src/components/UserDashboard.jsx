@@ -38,7 +38,6 @@ const renderProgressRing = (percentage, color) => {
             />
             {/* Percentage Text */}
             <text x="50%" y="50%" textAnchor="middle" dy=".3em" fontSize="10" fill="var(--text-dark)" fontWeight="700">
-                
                 {Math.round(percentage)}%
             </text>
         </svg>
@@ -127,8 +126,11 @@ const UserDashboard = ({ userId, approvedContent, subjectList }) => {
             <div className="score-visual-grid">
                 {subjectList.map(topic => {
                     const scoreData = userScores.find(s => s.topic === topic);
-                    const score = scoreData ? scoreData.highScore : 0;
-                    const quizPercentage = getScorePercentage(score);
+                    
+                    // ✅ CRITICAL FIX: Use lastScore for display. If lastScore is null, use 0.
+                    const scoreToDisplay = scoreData ? (scoreData.lastScore !== undefined ? scoreData.lastScore : 0) : 0;
+                    
+                    const quizPercentage = getScorePercentage(scoreToDisplay);
                     
                     const videoData = getVideoProgress(topic);
                     const videoPercentage = videoData ? videoData.percentage : 0;
@@ -148,7 +150,7 @@ const UserDashboard = ({ userId, approvedContent, subjectList }) => {
                                 {/* Score Text */}
                                 <div className="metric-text-area">
                                     <h4 style={{color: 'var(--text-dark)'}}>Last Quiz Score</h4>
-                                    <p className="score-value">{score} / {MAX_QUIZ_SCORE}</p>
+                                    <p className="score-value">{scoreToDisplay} / {MAX_QUIZ_SCORE}</p>
                                     <small className="last-attempt-text">Last Attempt: {scoreData ? new Date(scoreData.lastAttempt).toLocaleDateString() : 'N/A'}</small>
                                 </div>
                             </div>
@@ -167,7 +169,7 @@ const UserDashboard = ({ userId, approvedContent, subjectList }) => {
                                     <div className="metric-text-area">
                                         <h4 style={{color: 'var(--text-dark)'}}>Video Learning</h4>
                                         <p className="score-value">{videoData.watched} / {videoData.total} Watched</p>
-                                        <small style={{color: 'var(--text-medium)'}}>Total Resources: {videoData.total}</small>
+                                        <small className="last-attempt-text">Total Resources: {videoData.total}</small>
                                     </div>
                                 </div>
                             ) : (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css'; 
-
+import image from '../assets/image.jpg';
 // Helper function to save JWT token and user info to local storage
 const saveAuthData = (data) => {
     localStorage.setItem('userInfo', JSON.stringify(data));
@@ -36,88 +36,96 @@ const AuthScreen = () => {
             setLoading(false);
         }
     };
+return (
+  <div className="auth-wrapper">
+    <div className="auth-container">
+      {/* Left Section */}
+      <div className="auth-info">
+        <h1>Welcome to <span>Placement Hub ⚙</span></h1>
+        <p>
+          {isLogin
+            ? "Login to access personalized dashboards, quizzes, and placement resources."
+            : "Join Placement Hub today and get access to study materials, mock tests, and placement prep tools."}
+        </p>
+        <img
+          src={image}
+          alt="Placement illustration"
+          className="auth-image"
+        />
+      </div>
 
-    return (
-        // New wrapper class for vertical centering (as defined in the updated CSS)
-        <div className="auth-container-wrapper">
-            <div className="auth-container">
-                
-                {/* 1. Header (Top Gradient Bar) */}
-                <div className="auth-header">
-                    <h1>Placement - Hub ⚙️</h1>
-                </div>
+      {/* Right Section */}
+      <div className="auth-form-section">
+        <h2>{isLogin ? "Login to Dashboard" : "Create an Account"}</h2>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <label htmlFor="username">Username:</label>
+          <input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter your username or email"
+            required
+          />
 
-                {/* 2. Main Content (White Card Body) */}
-                <div className="auth-content">
-                    
-                    {/* Simplified & Bolder Title */}
-                    <h2>{isLogin ? 'Access Your Hub' : 'Create New Account'}</h2>
-                    <p className="subtitle">
-                        {isLogin ? 
-                         "Sign in to access your dashboard and verified resources." : 
-                         "Join the platform by creating your student profile."
-                        }
-                    </p>
+          <label htmlFor="password">Password:</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            required
+          />
 
-                    <form onSubmit={handleSubmit} className="auth-form">
-                        {/* Username Field */}
-                        <label htmlFor="username">Username:</label>
-                        <input 
-                            id="username"
-                            type="text" 
-                            value={username} 
-                            onChange={(e) => setUsername(e.target.value)} 
-                            placeholder="Enter email or student ID"
-                            required
-                        />
+          {isLogin && (
+            <div className="password-options">
+              <a href="#">Forgot Password?</a>
+            </div>
+          )}
 
-                        {/* Password Field */}
-                        <label htmlFor="password">Password:</label>
-                        <input 
-                            id="password"
-                            type="password" 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            placeholder="Enter your password"
-                            required
-                        />
-                        
-                        {/* Conditional Forgot Password Link (Only for Login View) */}
-                        {isLogin && (
-                            <div className="password-options">
-                                {/* Use a generic link for the moment, replace with actual routing later */}
-                                <a href="#" onClick={(e) => { e.preventDefault(); console.log('Forgot Password clicked'); }}>
-                                    Forgot Password?
-                                </a>
-                            </div>
-                        )}
-                        
-                        {/* Submit Button */}
-                        <button type="submit" disabled={loading}>
-                            {loading ? 'Processing...' : (isLogin ? 'Login to Dashboard' : 'Create Account')}
-                        </button>
-                    </form>
+          <button type="submit" disabled={loading}>
+            {loading ? "Processing..." : isLogin ? "Login" : "Register"}
+          </button>
 
-                    {message && <p className={`auth-message ${error.response ? 'error' : 'success'}`}>{message}</p>}
+          {message && <p className="auth-message">{message}</p>}
+        </form>
 
-                    {/* Footer for Toggle (Styled as a simple text link via CSS) */}
-                    <div className="auth-footer">
-                        {isLogin ? 
-                            <span>Need an account? </span> : 
-                            <span>Already have an account? </span>
-                        }
-                        <a 
-                            href="#" 
-                            onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); }}
-                        >
-                            {isLogin ? "Register Here" : "Login"}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+        <div className="auth-toggle">
+          {isLogin ? (
+            <>
+              <span>Don’t have an account? </span>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsLogin(false);
+                }}
+              >
+                Register here
+              </a>
+            </>
+          ) : (
+            <>
+              <span>Already have an account? </span>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsLogin(true);
+                }}
+              >
+                Login
+              </a>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 };
 
 
-export default AuthScreen;
+export default AuthScreen;

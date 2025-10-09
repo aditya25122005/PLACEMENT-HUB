@@ -1,4 +1,3 @@
-
 @import url("./theme-refined.css");
 
 
@@ -728,4 +727,189 @@ form textarea { resize: vertical; min-height: 100px; }
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
+}
+
+
+
+
+
+
+
+/* === AUTH SCREEN: LIGHT SOFT VERSION === */
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #f5f7fa;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Main Container */
+.auth-container {
+  display: flex;
+  width: 85%;
+  max-width: 1100px;
+  height: 600px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+/* Left Side - Info Section */
+.auth-info {
+  flex: 1;
+  background: linear-gradient(135deg, #dfe9f3, #f8f9fd);
+  color: #333;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-top-left-radius: 18px;
+  border-bottom-left-radius: 18px;
+}
+
+.auth-info h1 {
+  font-size: 2rem;
+  color: #3b3b98;
+  margin-bottom: 20px;
+}
+
+.auth-info span {
+  color: #0096c7;
+}
+
+.auth-info p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.auth-image {
+  width: 80%;
+  max-width: 350px;
+  align-self: center;
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+/* Right Side - Form Section */
+.auth-form-section {
+  flex: 1;
+  background: #ffffff;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
+.auth-form-section h2 {
+  color: #2b2b52;
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-form label {
+  font-weight: 500;
+  color: #333;
+}
+
+.auth-form input {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  font-size: 15px;
+  background: #f9fafc;
+}
+
+.auth-form input:focus {
+  border-color: #3b24cf;
+  box-shadow: 0 0 4px rgba(95, 168, 211, 0.4);
+  background: #fff;
+}
+
+.auth-form button {
+  background: #0d2eea;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.auth-form button:hover {
+  background: #2d16df;
+  transform: scale(1.02);
+}
+
+.password-options {
+  text-align: right;
+}
+
+.password-options a {
+  color: #2518e0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.auth-toggle {
+  margin-top: 25px;
+  text-align: center;
+  color: #444;
+}
+
+.auth-toggle a {
+  color: #1321e6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-toggle a:hover {
+  text-decoration: underline;
+}
+
+
+
+/* Light Mode (default) */
+body.light-mode {
+  background: #ffffff;
+  color: #222;
+  transition: all 0.4s ease;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background: #1e1e2a;
+  color: #f1f1f1;
+  transition: all 0.4s ease;
+}
+
+/* Card Grid */
+.score-visual-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Score Card */
+.score-card {
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+  transition: all 0.3s ease;
 }

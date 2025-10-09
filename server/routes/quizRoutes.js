@@ -26,6 +26,8 @@ router.post('/submit-answers', async (req, res) => {
     try {
         const questionIds = Object.keys(answers);
         const correctQuestions = await QuizQuestion.find({ _id: { $in: questionIds } });
+
+        // Score calculation logic
         correctQuestions.forEach(q => {
             const submittedIndex = answers[q._id.toString()];
             if (submittedIndex === q.correctAnswer) {
@@ -33,33 +35,51 @@ router.post('/submit-answers', async (req, res) => {
             }
         });
 
+        // **Dashboard Update Logic (Guaranteed Save)**
         if (userId) { 
             const user = await User.findById(userId);
             if (user) {
-
+                // Find the index to locate the exact score sub-document
                 const topicIndex = user.scores.findIndex(s => s.topic === topic);
-                let scoreEntry = topicIndex !== -1 ? user.scores[topicIndex] : null;
-                if (!scoreEntry) {
-                    user.scores.push({ topic, highScore: score, lastAttempt: Date.now() });
-                } 
- 
-                else {
-                    if (score >= scoreEntry.highScore) { 
-                        user.scores[topicIndex].highScore = score;
+
+                if (topicIndex === -1) {
+                    // Case 1: Topic score does not exist (Create New Entry)
+                    user.scores.push({ 
+                        topic, 
+                        highScore: score, 
+                        lastScore: score, // Initialize both high and last score
+                        lastAttempt: Date.now() 
+                    });
+                } else {
+                    // Case 2: Topic score exists (Update existing score)
+                    
+                    // Access the sub-document element directly via index
+                    const scoreEntry = user.scores[topicIndex]; 
+
+                    // Update High Score Logic
+                    if (score > scoreEntry.highScore) { 
+                        scoreEntry.highScore = score;
                     }
-                    user.scores[topicIndex].lastAttempt = Date.now();
-                    user.markModified('scores');
+                    
+                    // ✅ FIX: Update lastScore and lastAttempt
+                    scoreEntry.lastScore = score; 
+                    scoreEntry.lastAttempt = Date.now();
+
+                    // ⚠️ CRITICAL FIX: Mark the 'scores' array as modified 
+                    // This guarantees Mongoose saves the change to the nested array
+                    user.markModified('scores'); 
                 }
+                
                 await user.save();
             }
         }
-        res.json({ score, totalQuestions: questionIds.length });
+        
+        res.json({ score, totalQuestions: Object.keys(answers).length });
     } catch (error) {
-        console.error("Score update error:", error);
-        res.status(500).json({ message: 'Score submission and calculation failed.' });
+        console.error("SCORE SUBMISSION CRASH:", error); 
+        res.status(500).json({ message: 'Score submission failed due to server error.' });
     }
 });
-
 // 4. POST /api/quiz/add: Moderator adds a new Quiz Question (Pending or Approved)
 router.post('/add', async (req, res) => {
     const { topic, questionText, options, correctAnswer, status } = req.body;
@@ -180,4 +200,4 @@ router.delete('/:id', async (req, res) => {
 });
 
 
-module.exports = router;
+module.exports = router;
