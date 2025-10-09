@@ -43,6 +43,8 @@
 
   --max-width: 1200px;
   --container-pad: 20px;
+  --progress-orange: #3e33cee9; /* This color is used for video progress */
+  --primary-color: #047857; 
 }
 
 /* Respect reduced motion */
@@ -638,4 +640,219 @@ form input:focus, form textarea:focus, form select:focus {
   font-weight: 700;
   border-radius: 8px;
   cursor: pointer;
+}
+
+
+
+
+/*Updated User dashboard  */
+
+/* Flexbox container for Ring + Text */
+.progress-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.metric-text-area h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--secondary-color) !important;
+}
+
+.metric-text-area .score-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+.last-attempt-text {
+    color: var(--text-medium);
+    font-size: 0.85rem;
+}
+
+/* Ensure Progress Rings align properly */
+.score-card svg {
+    flex-shrink: 0; /* Prevents SVG from shrinking */
+}
+
+
+
+
+
+
+
+
+/* Companies List in App.jsx ki CSS */
+/* === VENDOR MARQUEE SECTION STYLES === */
+
+.companies-section {
+    /* Use padding to create space above and below the slider */
+    margin: 50px 0;
+    overflow: hidden; /* CRITICAL: Hides the overflowing content */
+    position: relative;
+    background: #ffffff;
+    padding: 25px 0; /* Increased vertical padding */
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.companies-slider {
+    /* Ensures the slider runs off-screen to enable smooth looping */
+    display: flex;
+    white-space: nowrap; /* Prevents wrapping */
+    gap: 30px;
+    align-items: center;
+    margin: 20px 0;
+    /* Combine two copies of the content to achieve a seamless loop */
+    width: fit-content; 
+}
+
+.company-card {
+    min-width: 150px;
+    padding: 10px 20px;
+    background: #f7f7f7; /* Changed background slightly off-white */
+    color: var(--text-dark, #1f2937); /* FIX: Ensure text is visible */
+    font-weight: 600; /* Adjusted for better reading */
+    font-size: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Lighter shadow */
+    text-align: center;
+    display: inline-flex; /* Use inline-flex for proper gap display */
+    flex-direction: column;
+    align-items: center;
+    /* Set a smooth transition on hover if needed */
+    transition: transform 0.3s; 
+}
+
+.company-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    /* Optional: Remove opacity/filter to ensure logos are vibrant */
+}
+
+
+/* --- Animation Classes --- */
+
+/* Standard left scroll */
+.marquee-left {
+    /* Use translate3d for hardware acceleration */
+    animation: scrollLeft 20s linear infinite;
+}
+
+/* Reverse scroll direction */
+.marquee-right {
+    /* Start at -50% and move back to 0 */
+    animation: scrollRight 20s linear infinite;
+}
+
+
+/* === Infinite scroll animations === */
+
+/* Left Scroll (Moves content from right to left) */
+@keyframes scrollLeft {
+    0% { transform: translate3d(0, 0, 0); }
+    /* Moves the duplicated content back by 50% width */
+    100% { transform: translate3d(-50%, 0, 0); } 
+}
+
+/* Right Scroll (Moves content from left to right) */
+@keyframes scrollRight {
+    /* Start at -50% (where the duplicated content begins) */
+    0% { transform: translate3d(-50%, 0, 0); }
+    /* End at 0% (moving the content forward) */
+    100% { transform: translate3d(0, 0, 0); }
+}
+
+
+
+
+/* --- Quiz Active Container --- */
+.quiz-active-container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 20px 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    animation: fadeSlideUp 0.5s ease forwards;
+}
+
+/* Question Card */
+.question-card-quiz {
+    margin: 15px 0;
+    padding: 15px 20px;
+    background: #f7f7f7;
+    border-radius: 12px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Options Grid */
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columns */
+    gap: 15px 20px; /* row gap 15px, column gap 20px */
+    margin-top: 15px;
+}
+
+/* Option Item */
+.option-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+.option-item input {
+    margin-right: 10px;
+}
+
+.option-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+}
+
+.option-item.selected {
+    background: #6d28d9;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 6px 15px rgba(109,40,217,0.3);
+}
+
+.option-item.selected input {
+    accent-color: #fff; /* Radio button color */
+}
+
+/* Quiz Results Card */
+.quiz-results-card {
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 25px 20px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* Animation */
+@keyframes fadeSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

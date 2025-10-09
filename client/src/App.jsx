@@ -66,6 +66,12 @@ const App = () => {
     };
 
     // --- INITIAL EFFECT: Load Content & Check Role ---
+        useEffect(() => {
+        // When selectedTopic or isDSAHubActive changes, scroll the window to the top (0, 0)
+        window.scrollTo(0, 0); 
+    }, [selectedTopic, isDSAHubActive]);
+
+
     useEffect(() => {
         // 1. Subject Fetching Logic
     const fetchSubjects = async () => {
@@ -206,6 +212,91 @@ const App = () => {
                     ))}
                 </div>
             </section>
+
+
+
+
+            <section className="companies-section">
+    <h2>Top Companies for Placements 🚀</h2>
+
+    {/* Top line - scroll left */}
+    <div className="companies-slider marquee-left">
+        {[
+            { name: "Google", logo: "https://logo.clearbit.com/google.com" },
+            { name: "Amazon", logo: "https://logo.clearbit.com/amazon.com" },
+            { name: "Microsoft", logo: "https://logo.clearbit.com/microsoft.com" },
+            { name: "Facebook", logo: "https://logo.clearbit.com/facebook.com" },
+            { name: "Apple", logo: "https://logo.clearbit.com/apple.com" },
+            { name: "TCS", logo: "https://logo.clearbit.com/tcs.com" },
+            { name: "Infosys", logo: "https://logo.clearbit.com/infosys.com" },
+            { name: "Wipro", logo: "https://logo.clearbit.com/wipro.com" },
+            { name: "Oracle", logo: "https://logo.clearbit.com/oracle.com" },
+            { name: "Goldman Sachs", logo: "https://logo.clearbit.com/goldmansachs.com" },
+            { name: "IBM", logo: "https://logo.clearbit.com/ibm.com" },
+            { name: "Adobe", logo: "https://logo.clearbit.com/adobe.com" },
+            { name: "Capgemini", logo: "https://logo.clearbit.com/capgemini.com" },
+            { name: "Accenture", logo: "https://logo.clearbit.com/accenture.com" },
+        ].concat([
+            { name: "Google", logo: "https://logo.clearbit.com/google.com" },
+            { name: "Amazon", logo: "https://logo.clearbit.com/amazon.com" },
+            { name: "Microsoft", logo: "https://logo.clearbit.com/microsoft.com" },
+            { name: "Facebook", logo: "https://logo.clearbit.com/facebook.com" },
+            { name: "Apple", logo: "https://logo.clearbit.com/apple.com" },
+            { name: "TCS", logo: "https://logo.clearbit.com/tcs.com" },
+            { name: "Infosys", logo: "https://logo.clearbit.com/infosys.com" },
+            { name: "Wipro", logo: "https://logo.clearbit.com/wipro.com" },
+            { name: "Oracle", logo: "https://logo.clearbit.com/oracle.com" },
+            { name: "Goldman Sachs", logo: "https://logo.clearbit.com/goldmansachs.com" },
+            { name: "IBM", logo: "https://logo.clearbit.com/ibm.com" },
+            { name: "Adobe", logo: "https://logo.clearbit.com/adobe.com" },
+            { name: "Capgemini", logo: "https://logo.clearbit.com/capgemini.com" },
+            { name: "Accenture", logo: "https://logo.clearbit.com/accenture.com" },
+        ]).map((company, idx) => (
+            <div key={idx} className="company-card">
+                <img src={company.logo} alt={company.name} className="company-logo" />
+                <p>{company.name}</p>
+            </div>
+        ))}
+    </div>
+
+    {/* Bottom line - scroll right */}
+    <div className="companies-slider marquee-right">
+        {[
+            { name: "Samsung", logo: "https://logo.clearbit.com/samsung.com" },
+            { name: "Intel", logo: "https://logo.clearbit.com/intel.com" },
+            { name: "Cisco", logo: "https://logo.clearbit.com/cisco.com" },
+            { name: "Dell", logo: "https://logo.clearbit.com/dell.com" },
+            { name: "Sony", logo: "https://logo.clearbit.com/sony.com" },
+            { name: "PayPal", logo: "https://logo.clearbit.com/paypal.com" },
+            { name: "HP", logo: "https://logo.clearbit.com/hp.com" },
+            { name: "Siemens", logo: "https://logo.clearbit.com/siemens.com" },
+            { name: "Snapchat", logo: "https://logo.clearbit.com/snapchat.com" },
+            { name: "Uber", logo: "https://logo.clearbit.com/uber.com" },
+            { name: "Spotify", logo: "https://logo.clearbit.com/spotify.com" },
+            { name: "Infosys", logo: "https://logo.clearbit.com/infosys.com" },
+            { name: "Wipro", logo: "https://logo.clearbit.com/wipro.com" },
+        ].concat([
+            { name: "Samsung", logo: "https://logo.clearbit.com/samsung.com" },
+            { name: "Intel", logo: "https://logo.clearbit.com/intel.com" },
+            { name: "Cisco", logo: "https://logo.clearbit.com/cisco.com" },
+            { name: "Dell", logo: "https://logo.clearbit.com/dell.com" },
+            { name: "Sony", logo: "https://logo.clearbit.com/sony.com" },
+            { name: "PayPal", logo: "https://logo.clearbit.com/paypal.com" },
+            { name: "HP", logo: "https://logo.clearbit.com/hp.com" },
+            { name: "Siemens", logo: "https://logo.clearbit.com/siemens.com" },
+            { name: "Snapchat", logo: "https://logo.clearbit.com/snapchat.com" },
+            { name: "Uber", logo: "https://logo.clearbit.com/uber.com" },
+            { name: "Spotify", logo: "https://logo.clearbit.com/spotify.com" },
+            { name: "Infosys", logo: "https://logo.clearbit.com/infosys.com" },
+            { name: "Wipro", logo: "https://logo.clearbit.com/wipro.com" },
+        ]).map((company, idx) => (
+            <div key={idx} className="company-card">
+                <img src={company.logo} alt={company.name} className="company-logo" />
+                <p>{company.name}</p>
+            </div>
+        ))}
+    </div>
+</section>
             
             {/* 3. SUBMISSION SECTION */}
             <section className="submission-section">

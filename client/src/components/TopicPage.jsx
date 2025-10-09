@@ -2,29 +2,41 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import QuizComponent from './QuizComponent'; 
 import YouTube from 'react-youtube'; // For video playback
+import QuizComponent from './QuizComponent'; 
 import '../App.css'; 
 
+// --- Helper Functions for Data Segregation (CRITICAL) ---
+
+// DSA links के लिए helper function: Content जिसमें dsaProblemLink है
 const getDsaContent = (content) => content.filter(item => item.dsaProblemLink);
 
+// Video resources के लिए helper function: Content जिसमें youtubeEmbedLink है
 const getVideoResources = (content) => content.filter(item => item.youtubeEmbedLink);
 
+// CRITICAL FIX: Study Material (Theory/Notes) के लिए Helper Function
+// आइटम को तभी थ्योरी मानें जब उसमें DSA लिंक और VIDEO लिंक दोनों मौजूद न हों।
 const getStudyMaterial = (content) => content.filter(item => 
     !item.dsaProblemLink && 
     !item.youtubeEmbedLink
 );
 
+
+// Component Signature: userId prop को receive करना ज़रोरी है
 const TopicPage = ({ topicName, content, userId }) => {
+    // State to manage the tab view: 'study', 'quiz', 'dsa', 'resources'
     const [activeTab, setActiveTab] = useState('study');
 
     // Filter content into three distinct groups
     const studyMaterial = getStudyMaterial(content);
     const dsaContent = getDsaContent(content);
     const videoResources = getVideoResources(content);
+
+
+    // --- Core Video Click Handler (Marks video as watched) ---
     const handleVideoClick = async (contentId) => {
         try {
-            // Hitting the API to mark content as watched
+            // API call to mark content as watched
             await axios.put(`/api/auth/watch-content/${userId}`, { contentId });
             // Force the main App to re-fetch user data to update the dashboard charts
             window.location.reload(); 
@@ -32,6 +44,9 @@ const TopicPage = ({ topicName, content, userId }) => {
             console.error("Failed to mark video watched:", error);
         }
     };
+
+
+    // Render Study Material Section
     const renderStudyMaterial = () => (
         <div className="study-material-section">
             <h3>📖 Theory & Explanations ({studyMaterial.length} Items)</h3>
@@ -40,11 +55,12 @@ const TopicPage = ({ topicName, content, userId }) => {
             ) : (
                 studyMaterial.map(item => (
                     <div key={item._id} className="study-item-card">
-                      
+                        {/* FIX: Renders question_text only if it exists */}
                         {item.question_text && <p><strong>{item.question_text}</strong></p>}
                         
                         <details>
                             <summary>Details</summary>
+                            {/* Explanation shown here */}
                             <p>{item.explanation}</p>
                             <small>Source: {item.source_url || 'N/A'}</small>
                         </details>
@@ -72,8 +88,8 @@ const TopicPage = ({ topicName, content, userId }) => {
                                 {/* ✅ FIX: Use videoTitle field for the header */}
                                 <h4>{item.videoTitle || item.question_text || "Video Resource"}</h4>
                                 
-                                {/* Iframe must be wrapped in a div with onClick handler */}
-                                <div onClick={() => handleVideoClick(item._id)} className="video-embed-wrapper">
+                                {/* Iframe wrapped in a div with onClick handler (onEnd tracking) */}
+                                <div className="video-embed-wrapper">
                                     <YouTube
                                         videoId={item.youtubeEmbedLink} 
                                         opts={{
@@ -81,7 +97,9 @@ const TopicPage = ({ topicName, content, userId }) => {
                                             height: '200',
                                             playerVars: { controls: 1, modestbranding: 1, rel: 0 },
                                         }}
+                                        // CRITICAL: onEnd event marks progress
                                         onEnd={() => handleVideoClick(item._id)}
+                                        onPlay={() => handleVideoClick(item._id)} // Track progress when it starts playing (more reliable UX)
                                         title={item.videoTitle || item.question_text} 
                                     />
                                 </div>
@@ -101,7 +119,7 @@ const TopicPage = ({ topicName, content, userId }) => {
     // Render DSA Problems Section
     const renderDsaProblems = () => (
         <div className="dsa-section">
-            <h3>🔗 Important DSA Problems ({dsaContent.length} Problems)</h3>
+            <h3>🔗 Practice Problems ({dsaContent.length} Problems)</h3>
             {dsaContent.length === 0 ? (
                 <p>No DSA problems found for {topicName}.</p>
             ) : (
