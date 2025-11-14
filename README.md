@@ -1,4 +1,10 @@
 <img width="1888" height="862" alt="image" src="https://github.com/user-attachments/assets/e435ec55-1e9b-4d83-b317-58dae21be90d" />
+ Admin Dashboard
+ <img width="1914" height="833" alt="image" src="https://github.com/user-attachments/assets/51e31c05-7c6a-4106-92fc-405d6464bb15" />
+ DSA Track
+ <img width="1303" height="858" alt="image" src="https://github.com/user-attachments/assets/49b0df18-cd1d-4a58-ad2f-e003f5cd5bdb" />
+
+
 📝 Verified Placement Prep Hub
 A systematic, full-stack web application designed to solve the problem of unverified content and chaotic preparation by providing students with a moderator-validated learning platform.
 
@@ -105,4 +111,5 @@ node server.js
 # Terminal 2: Frontend
 cd client
 npm run dev
+
 
