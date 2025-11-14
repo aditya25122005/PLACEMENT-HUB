@@ -1,3 +1,4 @@
+<img width="1888" height="862" alt="image" src="https://github.com/user-attachments/assets/e435ec55-1e9b-4d83-b317-58dae21be90d" />
 📝 Verified Placement Prep Hub
 A systematic, full-stack web application designed to solve the problem of unverified content and chaotic preparation by providing students with a moderator-validated learning platform.
 
@@ -104,3 +105,4 @@ node server.js
 # Terminal 2: Frontend
 cd client
 npm run dev
+
