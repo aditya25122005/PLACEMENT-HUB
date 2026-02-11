@@ -23,6 +23,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/auth', authRoutes); 
 app.use('/api/quiz', quizRoutes); 
 app.use('/api/subjects', subjectRoutes);
+app.use("/uploads", express.static("uploads"));
 
 // Simple Test Route
 app.get('/', (req, res) => {

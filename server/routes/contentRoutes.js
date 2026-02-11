@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Content = require('../models/Content'); 
+const upload = require("../config/multer");   
 
-// 1. POST /api/content/submit: Student Content Submission (The 'Net' part)
-router.post('/submit', async (req, res) => {
+// 1. POST /api/content/submit
+
+router.post('/submit', upload.single("pdf"), async (req, res) => {
     try {
-        
         const { 
             topic, 
             question_text, 
@@ -14,24 +15,28 @@ router.post('/submit', async (req, res) => {
             dsaProblemLink, 
             youtubeSolutionLink,
             youtubeEmbedLink, 
-            videoTitle 
+            videoTitle,
+            contentType
         } = req.body;
-        
-    
-        if (!topic || !question_text) {
-            return res.status(400).json({ message: 'Topic and Question Text are required.' });
+
+        if (!topic) {
+            return res.status(400).json({ message: 'Topic is required.' });
         }
+
+        const pdfUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
         const newContent = await Content.create({
             topic,
             question_text,
             explanation,
             source_url,
-            dsaProblemLink, 
+            dsaProblemLink,
             youtubeSolutionLink,
             youtubeEmbedLink,
             videoTitle,
-            status: 'pending', 
+            contentType: contentType || "text",
+            pdfUrl,
+            status: 'pending'
         });
 
         res.status(201).json({ 
@@ -43,10 +48,9 @@ router.post('/submit', async (req, res) => {
     }
 });
 
-// 2. GET /api/content/approved: Fetch Verified Content (The 'Systematic' part)
+// 2. GET APPROVED CONTENT 
 router.get('/approved', async (req, res) => {
     try {
-        
         const approvedContent = await Content.find({ status: 'approved' }).sort({ createdAt: -1 });
         res.json(approvedContent);
     } catch (error) {
@@ -54,10 +58,10 @@ router.get('/approved', async (req, res) => {
     }
 });
 
-// 3. GET /api/content/pending: Fetch Pending Content (Moderator Dashboard)
+// 3. GET PENDING (NO CHANGE)
+
 router.get('/pending', async (req, res) => {
     try {
-       
         const pendingContent = await Content.find({ status: 'pending' }).sort({ createdAt: 1 });
         res.json(pendingContent);
     } catch (error) {
@@ -65,15 +69,14 @@ router.get('/pending', async (req, res) => {
     }
 });
 
-// 4. PUT /api/content/approve/:id: Moderator Approval (The 'Moderation' part)
+// 4. APPROVE CONTENT (NO CHANGE)
+
 router.put('/approve/:id', async (req, res) => {
     try {
-        const contentId = req.params.id;
-        
         const updatedContent = await Content.findByIdAndUpdate(
-            contentId,
+            req.params.id,
             { status: 'approved' },
-            { new: true } 
+            { new: true }
         );
 
         if (!updatedContent) {
@@ -89,15 +92,14 @@ router.put('/approve/:id', async (req, res) => {
     }
 });
 
-// 5. PUT /api/content/reject/:id: Moderator Rejection
+// 5. REJECT CONTENT (NO CHANGE)
+
 router.put('/reject/:id', async (req, res) => {
     try {
-        const contentId = req.params.id;
-        
         const rejectedContent = await Content.findByIdAndUpdate(
-            contentId,
+            req.params.id,
             { status: 'rejected' },
-            { new: true } 
+            { new: true }
         );
 
         if (!rejectedContent) {
@@ -113,10 +115,10 @@ router.put('/reject/:id', async (req, res) => {
     }
 });
 
-// 6. POST /api/content/add-official: Moderator/Faculty can directly add approved content
-router.post('/add-official', async (req, res) => {
+// 6. ADD OFFICIAL CONTENT (NOW SUPPORTS PDF)
+
+router.post('/add-official', upload.single("pdf"), async (req, res) => {
     try {
-      
         const { 
             topic, 
             question_text, 
@@ -124,34 +126,27 @@ router.post('/add-official', async (req, res) => {
             dsaProblemLink, 
             youtubeSolutionLink,
             youtubeEmbedLink, 
-            videoTitle 
+            videoTitle,
+            contentType
         } = req.body;
 
         if (!topic) {
             return res.status(400).json({ message: 'Topic is required for official content.' });
         }
-        
-  
-        if (
-            !question_text && 
-            !explanation &&
-            !dsaProblemLink &&
-            !youtubeSolutionLink &&
-            !youtubeEmbedLink
-        ) {
-            return res.status(400).json({ message: 'Content body missing. Please add an explanation OR at least one link.' });
-        }
-        
-      
+
+        const pdfUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
         const officialContent = await Content.create({
             topic,
             question_text,
             explanation,
-            dsaProblemLink, 
+            dsaProblemLink,
             youtubeSolutionLink,
-            youtubeEmbedLink, 
-            videoTitle, 
-            status: 'approved', 
+            youtubeEmbedLink,
+            videoTitle,
+            contentType: contentType || "text",
+            pdfUrl,
+            status: 'approved'
         });
 
         res.status(201).json({ 
@@ -163,21 +158,19 @@ router.post('/add-official', async (req, res) => {
     }
 });
 
-// 7. GET /api/content/quiz: Fetch a random set of N approved questions
+// 7. QUIZ ROUTE (NO CHANGE)
+
 router.get('/quiz', async (req, res) => {
     try {
-       
-        const quizSize = 5; 
-        
-        
+        const quizSize = 5;
+
         const quizQuestions = await Content.aggregate([
-            { $match: { status: 'approved' } }, 
-            { $sample: { size: quizSize } } 
+            { $match: { status: 'approved' } },
+            { $sample: { size: quizSize } }
         ]);
-        
-        
+
         const safeQuizQuestions = quizQuestions.map(q => {
-            q.explanation = undefined; 
+            q.explanation = undefined;
             return q;
         });
 
@@ -187,7 +180,8 @@ router.get('/quiz', async (req, res) => {
     }
 });
 
-// 8. DELETE /api/content/:id: Delete any content (for Moderator QC)
+// 8. DELETE (NO CHANGE)
+
 router.delete('/:id', async (req, res) => {
     try {
         const deletedContent = await Content.findByIdAndDelete(req.params.id);
@@ -200,14 +194,15 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// 9. PUT /api/content/:id: Update existing content (Edit)
+
+// 9. UPDATE CONTENT (NO CHANGE)
+
 router.put('/:id', async (req, res) => {
     try {
-        
         const updatedContent = await Content.findByIdAndUpdate(
             req.params.id,
             { $set: req.body },
-            { new: true, runValidators: true } 
+            { new: true, runValidators: true }
         );
 
         if (!updatedContent) {
@@ -219,7 +214,9 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// 10. GET /api/content/all: Get ALL content (Approved, Rejected, Pending) for full admin overview
+
+// 10. GET ALL (NO CHANGE)
+
 router.get('/all', async (req, res) => {
     try {
         const allContent = await Content.find().sort({ createdAt: -1 });
@@ -228,4 +225,5 @@ router.get('/all', async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch all content.' });
     }
 });
+
 module.exports = router;

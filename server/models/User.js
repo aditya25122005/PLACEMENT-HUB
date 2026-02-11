@@ -21,6 +21,7 @@ const UserSchema = new mongoose.Schema({
     scores: [ScoreSchema],
     solvedDSA: [{ type: String }], 
     watchedContent: [{ type: String }], 
+    
 
 }, { timestamps: true });
 

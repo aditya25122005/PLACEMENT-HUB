@@ -1,67 +1,52 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../App.css'; 
-const OfficialContentForm = ({ onContentAdded, subjectList }) => { 
-    
+import '../App.css';
+
+const OfficialContentForm = ({ onContentAdded, subjectList }) => {
+
     const [formData, setFormData] = useState({
-        topic: 'Aptitude', 
-        question_text: '', 
-        videoTitle: '',   
-        explanation: '', 
+        topic: 'Aptitude',
+        question_text: '',
+        videoTitle: '',
+        explanation: '',
         dsaProblemLink: '',
         youtubeSolutionLink: '',
-        youtubeEmbedLink: '', 
+        youtubeEmbedLink: '',
     });
-    
+
+    // ⭐ NEW STATES
+    const [contentType, setContentType] = useState("text");
+    const [pdfFile, setPdfFile] = useState(null);
+
     const [message, setMessage] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false); 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const extractYouTubeID = (url) => {
         const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?feature=player_embedded&v=|watch\?v=))([^&?/\n]+)/);
         if (match) return match[1];
         const embedMatch = url.match(/\/embed\/([^/?]+)/);
         if (embedMatch) return embedMatch[1];
-        return url; 
+        return url;
     };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         let finalValue = value;
+
         if (name === 'youtubeEmbedLink') {
             const iframeMatch = value.match(/src="([^"]+)"/);
             const urlToProcess = iframeMatch ? iframeMatch[1] : value;
-            
-            finalValue = extractYouTubeID(urlToProcess); 
+            finalValue = extractYouTubeID(urlToProcess);
         }
-        
+
         setFormData({ ...formData, [name]: finalValue });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!formData.topic) {
             setMessage('❌ Topic Category is required.');
-            return;
-        }
-
-        const isContentBodyMissing = (
-            !formData.question_text && 
-            !formData.explanation && 
-            !formData.dsaProblemLink && 
-            !formData.youtubeSolutionLink &&
-            !formData.youtubeEmbedLink
-        );
-
-        const isVideoTitleMissing = (
-            !!formData.youtubeEmbedLink && !formData.videoTitle
-        );
-
-        if (isContentBodyMissing) {
-            setMessage('❌ Please provide an Internal Solution OR at least one external link (Video/DSA).');
-            return;
-        }
-        
-        if (isVideoTitleMissing) {
-            setMessage('❌ If you provide an Embed Link, the Video Title is required.');
             return;
         }
 
@@ -69,13 +54,26 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
         setMessage('');
 
         try {
-            await axios.post('/api/content/add-official', formData);
+
+            // ⭐ USE FORMDATA
+            const submitData = new FormData();
+
+            Object.keys(formData).forEach(key => {
+                submitData.append(key, formData[key]);
+            });
+
+            submitData.append("contentType", contentType);
+
+            if (contentType === "pdf" && pdfFile) {
+                submitData.append("pdf", pdfFile);
+            }
+
+            await axios.post('/api/content/add-official', submitData);
 
             setMessage('✅ Official Content Added Successfully! It is immediately live.');
 
             setFormData({
-              
-                topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude', 
+                topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude',
                 question_text: '',
                 videoTitle: '',
                 explanation: '',
@@ -83,80 +81,86 @@ const OfficialContentForm = ({ onContentAdded, subjectList }) => {
                 youtubeSolutionLink: '',
                 youtubeEmbedLink: '',
             });
-            
-            onContentAdded(); 
+
+            setContentType("text");
+            setPdfFile(null);
+
+            onContentAdded();
 
         } catch (error) {
             console.error('Submission error:', error);
-            const errorMsg = error.response?.data?.message || '❌ Failed to add official content. Check server console.';
+            const errorMsg = error.response?.data?.message || '❌ Failed to add official content.';
             setMessage(errorMsg);
         } finally {
-            setIsSubmitting(false); 
+            setIsSubmitting(false);
         }
     };
 
     return (
         <div className="official-submission-container">
             <h3>➕ Add Official Verified Content (Faculty Input)</h3>
-            <p>Content added here bypasses the queue and goes directly live, fulfilling **Gla Feedback**.</p>
-            
+
             <form onSubmit={handleSubmit} className="official-form">
-                
+
+                {/* ⭐ NEW CONTENT TYPE SELECT */}
+                <label>Content Type:</label>
+                <select value={contentType} onChange={(e)=>setContentType(e.target.value)}>
+                    <option value="text">Text Theory</option>
+                    <option value="video">Video Resource</option>
+                    <option value="pdf">PDF Notes</option>
+                </select>
+
                 <label>Topic Category:</label>
                 <select name="topic" value={formData.topic} onChange={handleChange} required>
-                
                     {subjectList && subjectList.map(t => (
                         <option key={t} value={t}>{t}</option>
                     ))}
-                    {!subjectList || subjectList.length === 0 && <option value="">Loading Subjects...</option>}
                 </select>
 
-                <label>Problem/Concept Title:</label>
-                <textarea name="question_text" value={formData.question_text} onChange={handleChange} placeholder="Enter the main problem statement or theory title. (Optional for video-only)" rows="2" />
+                {/* ⭐ PDF INPUT */}
+                {contentType === "pdf" && (
+                    <>
+                        <label>Upload PDF Notes:</label>
+                        <input
+                            type="file"
+                            accept="application/pdf"
+                            onChange={(e)=>setPdfFile(e.target.files[0])}
+                        />
+                    </>
+                )}
 
-                <label>Internal Solution / Detailed Concepts:</label>
-                <textarea 
-                    name="explanation" 
-                    value={formData.explanation} 
-                    onChange={handleChange} 
-                    placeholder="Enter the step-by-step solution, algorithm, or full explanation." 
-                    rows="4" 
-                />
-                
-                <hr style={{margin: '20px 0'}}/> 
-                
-                <h4>Optional: Video & External Resources</h4>
-                
-             
-                <label>Video Title (Required if using Embed Link):</label>
-                <input 
-                    type="text" 
-                    name="videoTitle" 
-                    value={formData.videoTitle} 
-                    onChange={handleChange} 
-                    placeholder="e.g., Lec-1: Full DBMS Syllabus Overview"
-                />
+                {/* OLD FIELDS (ONLY IF NOT PDF) */}
+                {contentType !== "pdf" && (
+                    <>
+                        <label>Problem/Concept Title:</label>
+                        <textarea name="question_text" value={formData.question_text} onChange={handleChange} rows="2" />
 
-                <label>YouTube Embed Link (Paste **Full IFRAME Code** or Clean URL):</label>
-                <input 
-                    type="text" 
-                    name="youtubeEmbedLink" 
-                    value={formData.youtubeEmbedLink} 
-                    onChange={handleChange} 
-                    placeholder="Paste the full iframe code OR https://www.youtube.com/embed/VIDEO_ID"
-                />
+                        <label>Internal Solution / Detailed Concepts:</label>
+                        <textarea name="explanation" value={formData.explanation} onChange={handleChange} rows="4" />
 
-                <label>DSA Problem Link (e.g., LeetCode/GFG):</label>
-                <input type="url" name="dsaProblemLink" value={formData.dsaProblemLink} onChange={handleChange} placeholder="https://leetcode.com/problem-name" />
+                        <hr style={{margin: '20px 0'}}/>
 
-                <label>YouTube Solution Link (For External Button):</label>
-                <input type="url" name="youtubeSolutionLink" value={formData.youtubeSolutionLink} onChange={handleChange} placeholder="https://youtube.com/watch?v=solution_id" />
+                        <h4>Optional: Video & External Resources</h4>
+
+                        <label>Video Title:</label>
+                        <input type="text" name="videoTitle" value={formData.videoTitle} onChange={handleChange} />
+
+                        <label>YouTube Embed Link:</label>
+                        <input type="text" name="youtubeEmbedLink" value={formData.youtubeEmbedLink} onChange={handleChange} />
+
+                        <label>DSA Problem Link:</label>
+                        <input type="url" name="dsaProblemLink" value={formData.dsaProblemLink} onChange={handleChange} />
+
+                        <label>YouTube Solution Link:</label>
+                        <input type="url" name="youtubeSolutionLink" value={formData.youtubeSolutionLink} onChange={handleChange} />
+                    </>
+                )}
 
                 <button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Publishing...' : 'Publish Content Now'} 
+                    {isSubmitting ? 'Publishing...' : 'Publish Content Now'}
                 </button>
             </form>
-            
+
             {message && <p className={`submission-message ${message.startsWith('✅') ? 'success' : 'error'}`}>{message}</p>}
         </div>
     );

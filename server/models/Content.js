@@ -32,6 +32,15 @@ const ContentSchema = new mongoose.Schema({
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
+    contentType: {
+    type: String,
+    enum: ['text','video','pdf'],
+    default: 'text'
+    },
+
+    pdfUrl: {
+            type: String
+    }
     
 }, { 
     timestamps: true 
