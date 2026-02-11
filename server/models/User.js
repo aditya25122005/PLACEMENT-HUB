@@ -12,16 +12,37 @@ const ScoreSchema = new mongoose.Schema({
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    email: { type: String, unique: true, lowercase: true },
     role: { 
         type: String, 
         enum: ['student', 'moderator'], 
         default: 'student' 
     },
-   
+      // ⭐ PROFILE DETAILS
+  dp: { type: String, default: "" },
+  dob: { type: Date },
+  college: { type: String },
+  branch: { type: String },
+
+  // ⭐ LEETCODE USERNAME
+  leetcodeId: { type: String },
+
+  // ⭐ SAVED LEETCODE STATS (FETCH ONCE MODEL)
+  leetcodeStats: {
+    totalSolved: { type: Number, default: 0 },
+    easySolved: { type: Number, default: 0 },
+    mediumSolved: { type: Number, default: 0 },
+    hardSolved: { type: Number, default: 0 },
+    ranking: { type: Number, default: 0 },
+    contestRating: { type: Number, default: 0 },
+    totalContests: { type: Number, default: 0 },
+  },
+  
     scores: [ScoreSchema],
-    solvedDSA: [{ type: String }], 
-    watchedContent: [{ type: String }], 
-    
+    solvedDSA: [{ type: mongoose.Schema.Types.ObjectId, ref: "Content" }],
+    watchedContent: [{ type: mongoose.Schema.Types.ObjectId, ref: "Content" }],
+
+
 
 }, { timestamps: true });
 
