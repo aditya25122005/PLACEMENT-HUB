@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from "../api";
 import YouTube from 'react-youtube';
 import QuizComponent from './QuizComponent';
 import { motion, AnimatePresence } from 'framer-motion';

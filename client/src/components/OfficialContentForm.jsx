@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from "../api";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiFilePlus, FiType, FiVideo, FiFile, 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../api";
 
 const ContentSubmissionForm = ({ onSubmissionSuccess, subjectList }) => {
   const [formData, setFormData] = useState({

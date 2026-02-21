@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../api";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FiUser, FiBookOpen, FiCode, FiCalendar, 
@@ -163,7 +163,7 @@ const ProfilePage = ({ userId, onBack }) => {
               <div className="relative">
                 <div className="relative inline-block mt-4">
                   <img
-                    src={preview ? `http://localhost:5000${preview}` : "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                    src={preview ? `${import.meta.env.VITE_API_URL}${preview}` : "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
                     className="w-36 h-36 rounded-[2.5rem] border-4 border-white shadow-xl group-hover:rotate-3 transition-transform duration-500 object-cover overflow-hidden"
                     alt="Profile"
                   />
