@@ -1,106 +1,68 @@
-📝 Verified Placement Prep Hub
-A systematic, full-stack web application designed to solve the problem of unverified content and chaotic preparation by providing students with a moderator-validated learning platform.
+# ⚙️ Verified Placement Prep Hub
 
-The application enforces a Quality Gate (Moderation Loop) for all content sourced from the community or the internet, ensuring students only study reliable, high-relevance material.
+**Verified Placement Prep Hub** is a systematic, full-stack MERN application designed to eliminate unverified content and chaotic preparation. It provides students with a moderator-validated learning environment where every piece of information is vetted for quality and relevance.
 
-✨ Unique Selling Proposition (USP)
-Our primary competitive advantage over platforms like GeeksforGeeks or public forums is Trust and Accountability.
+📸 Platform Preview
+<img width="1584" height="863" alt="Screenshot 2026-02-21 130655" src="https://github.com/user-attachments/assets/4803bed6-a133-49b8-804b-6edc16337c01" />
+<img width="1888" height="844" alt="Screenshot 2026-02-21 131004" src="https://github.com/user-attachments/assets/319d00ba-f1c1-4476-8cc0-866f18f6f7f8" />
+<img width="1891" height="851" alt="Screenshot 2026-02-21 131031" src="https://github.com/user-attachments/assets/cbb8270c-ce5f-4a59-8ea4-884069a630fd" />
+<img width="1887" height="842" alt="Screenshot 2026-02-21 131055" src="https://github.com/user-attachments/assets/60eed7b2-628a-4cc7-99aa-5af19c25b660" />
+<img width="1872" height="835" alt="Screenshot 2026-02-21 131142" src="https://github.com/user-attachments/assets/568fdf0c-72e0-47db-a3f8-2f3c771e2029" />
+<img width="1890" height="836" alt="Screenshot 2026-02-21 131234" src="https://github.com/user-attachments/assets/333ba71d-f717-4593-96e9-45c17d1e7f3e" />
+<img width="1797" height="863" alt="Screenshot 2026-02-21 131312" src="https://github.com/user-attachments/assets/003b7947-bd3a-47d9-a3b9-25521a15bf8d" />
+<img width="1779" height="863" alt="Screenshot 2026-02-21 131339" src="https://github.com/user-attachments/assets/be914311-ab4d-41d7-8379-55b982532584" />
 
-Feature	Impact
-Gla-Validated Content	Content is submitted by the community but only goes live after faculty/admin approval, ensuring 100% relevance to campus drives and syllabus requirements.
-Systematic Progress Tracking	Visual Dashboards use dynamic Progress Rings to show real-time scores (Quiz Mastery) and Video Progress for every subject.
-Dynamic CMS Architecture	Admins can add new subjects (e.g., 'React JS', 'Machine Learning') and manage all content and quizzes without touching the codebase.
-Integrated Learning	Centralized hub for Theory, Topic-wise MCQs, and direct links to external DSA problems and solutions.
 
-Export to Sheets
-💻 Tech Stack
-This is a modern, high-performance MERN stack application built for stability and scalability.
+---
 
-Frontend
-Framework: React.js (using Vite for fast development).
+## ✨ Unique Selling Proposition (USP)
 
-UI/Styling: Custom CSS (Professional Emerald/Navy Theme) and SVG for dynamic Progress Rings.
+Our primary competitive advantage over generic public forums is **Trust and Accountability**.
 
-API Client: Axios.
+| Feature | Impact |
+| :--- | :--- |
+| **Gla-Validated Content** | Community-sourced content only goes live after faculty/admin approval, ensuring 100% relevance to campus drives. |
+| **The Moderation Loop** | A strict "Quality Gate" workflow that prevents misinformation from reaching the student dashboard. |
+| **Systematic Tracking** | Visual Dashboards using dynamic Progress Rings for real-time Quiz Mastery and Video completion. |
+| **Dynamic CMS Architecture** | Admins can scale the curriculum (e.g., adding 'Machine Learning') instantly without touching the codebase. |
 
-Video Tracking: react-youtube (Used for reliable onEnd event tracking for video progress).
+---
 
-Backend & Database
-Runtime: Node.js with Express.js (RESTful API).
+## 🔒 Key Workflows & Features
 
-Database: MongoDB Atlas (Cloud-hosted).
+### 1. The Quality Gate (Moderation Loop)
+This central workflow ensures that students only study reliable material:
+1. **Submission:** Students/Faculty propose resources (Theory, DSA links, or Videos).
+2. **Verification Queue:** Content remains in a "Pending" state, hidden from the public.
+3. **Moderator Audit:** Admins review accuracy and relevance on the Control Center.
+4. **Live Deployment:** Approved items instantly transition to "Verified" status.
 
-Security: JWT for token-based authentication and Bcrypt for password hashing.
+> ****
 
-Data Structure: Normalized schema across three collections (Users, Content, QuizQuestion) to support scalable tracking and modularity.
+### 2. Student Mastery Dashboard
+A premium analytics command center:
+* **Quiz Mastery:** Circular Progress Rings showing the user's latest scores and percentage mastery.
+* **Video Learning:** Real-time tracking of watched resources using `react-youtube` event hooks.
+* **Topic Hub:** A dynamic grid of subjects (Aptitude, DSA, Core CS, etc.) fetched from the database.
 
-🔒 Key Features & Workflow
-1. The Moderation Loop (The Core USP)
-This is the central workflow for ensuring quality control:
+> ****
 
-Submission: Students use the Content Submission Form to propose new external links or theory (e.g., a new DSA problem found online).
+### 3. Dedicated DSA Vault
+A streamlined interface for algorithmic practice:
+* **Search & Filter:** Find problems by title or specific tags instantly via a modern search bar.
+* **Persistent Progress:** Save solved status across sessions to track long-term growth.
+* **Logic Overlays:** Animated approach/solution sections for every problem using Framer Motion.
 
-Admin Review: The content lands in the Verify Submissions pending queue.
+> ****
 
-Quality Gate: The Moderator logs in, reviews the content (on the Admin Dashboard), and uses the Approve button.
+---
 
-Result: The item instantly goes live with a "Verified" status.
+## 💻 Tech Stack
 
-2. User Dashboard (Systematic Feedback)
-Quiz Mastery: Visualized by Circular Progress Rings showing the user's last score (X/5) and percentage mastery in each subject.
+- **Frontend:** React.js (Vite), Tailwind CSS, Framer Motion (Animations).
+- **Backend:** Node.js, Express.js (RESTful API).
+- **Database:** MongoDB Atlas (Normalized schema for Users, Content, and Quizzes).
+- **Data Viz:** Recharts & Dynamic SVG for progress visualization.
+- **Security:** JWT (JSON Web Tokens) & Bcrypt password hashing.
 
-Video Learning: A separate progress ring tracks the percentage of approved video resources the user has marked as watched.
-
-Topic Hub: Dynamic list of subjects fetched from the database (not hardcoded).
-
-3. Admin Tools (Full Control)
-Content Library: Full CRUD (Create, Read, Update, Delete) control over all study materials.
-
-Quiz Library: Full CRUD control over all quiz questions and options.
-
-Subject Manager: Ability to add new subjects dynamically (e.g., Machine Learning) without code changes.
-
-⚙ Setup and Installation
-Prerequisites
-Node.js (v18+)
-
-MongoDB Atlas Account
-
-Active Internet Connection (VPN/Hotspot may be needed for Atlas access)
-
-Local Setup
-Clone the repository:
-
-Bash
-
-git clone [Your GitHub Repo URL]
 cd verified-placement-hub
-Install Dependencies:
-
-Bash
-
-cd server && npm install
-cd ../client && npm install
-Configure Atlas URI: Create a server/.env file and set your Atlas connection string:
-
-Code snippet
-
-# server/.env
-MONGO_URI="mongodb+srv://<USERNAME>:<PASSWORD>@cluster0.xxx.mongodb.net/PlacementDB?retryWrites=true&w=majority"
-JWT_SECRET="Your_Secret_Key"
-Seed the Database (Load Data): Run the seeder script to create initial content and user accounts (modadmin, teststudent):
-
-Bash
-
-cd server
-node seed.js
-Start Servers:
-
-Bash
-
-# Terminal 1: Backend
-node server.js
-
-# Terminal 2: Frontend
-cd client
-npm run dev
