@@ -33,39 +33,41 @@ router.post('/submit-answers', async (req, res) => {
 
        
         if (userId) { 
-            const user = await User.findById(userId);
-            if (user) {
-                
-                const topicIndex = user.scores.findIndex(s => s.topic === topic);
+    const user = await User.findById(userId);
+    if (user) {
+        const totalQuestions = correctQuestions.length;   // ⭐ ADD THIS
 
-                if (topicIndex === -1) {
-                
-                    user.scores.push({ 
-                        topic, 
-                        highScore: score, 
-                        lastScore: score, 
-                        lastAttempt: Date.now() 
-                    });
-                } else {
-                    const scoreEntry = user.scores[topicIndex]; 
+        const topicIndex = user.scores.findIndex(s => s.topic === topic);
 
-                 
-                    if (score > scoreEntry.highScore) { 
-                        scoreEntry.highScore = score;
-                    }
-                    
-            
-                    scoreEntry.lastScore = score; 
-                    scoreEntry.lastAttempt = Date.now();
+        if (topicIndex === -1) {
 
-                    user.markModified('scores'); 
-                }
-                
-                await user.save();
+            user.scores.push({ 
+                topic, 
+                highScore: score, 
+                lastScore: score,
+                totalQuestions: totalQuestions,   // ⭐ ADD
+                lastAttempt: Date.now() 
+            });
+
+        } else {
+
+            const scoreEntry = user.scores[topicIndex]; 
+
+            if (score > scoreEntry.highScore) { 
+                scoreEntry.highScore = score;
             }
+
+            scoreEntry.lastScore = score; 
+            scoreEntry.totalQuestions = totalQuestions;   // ⭐ ADD
+            scoreEntry.lastAttempt = Date.now();
+
+            user.markModified('scores'); 
         }
-        
-        res.json({ score, totalQuestions: Object.keys(answers).length });
+
+        await user.save();
+    }
+}
+       res.json({ score, totalQuestions: correctQuestions.length });
     } catch (error) {
         console.error("SCORE SUBMISSION CRASH:", error); 
         res.status(500).json({ message: 'Score submission failed due to server error.' });

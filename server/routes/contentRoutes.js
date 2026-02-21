@@ -227,3 +227,26 @@ router.get('/all', async (req, res) => {
 });
 
 module.exports = router;
+
+
+// 11. UPDATE SOLVE STATUS 
+router.put('/solve-status/:id', async (req, res) => {
+    try {
+        const { isSolved } = req.body;
+
+        const updated = await Content.findByIdAndUpdate(
+            req.params.id,
+            { isSolved },
+            { new: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ message: "Problem not found" });
+        }
+
+        res.json({ message: "Solve status updated", content: updated });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});

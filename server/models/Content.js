@@ -21,6 +21,7 @@ const ContentSchema = new mongoose.Schema({
     dsaProblemLink: { 
         type: String
     },
+    
     youtubeSolutionLink: { 
         type: String
     },

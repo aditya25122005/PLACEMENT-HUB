@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 
 const ScoreSchema = new mongoose.Schema({
     topic: { type: String, required: true },
-    highScore: { type: Number, default: 0 },
-    lastScore: { type: Number, default: 0 },
-    lastAttempt: { type: Date, default: Date.now },
-    
+    highScore: Number,
+    lastScore: Number,
+    totalQuestions: { type: Number, default: 0 },
+    lastAttempt: Date
 });
 
 const UserSchema = new mongoose.Schema({

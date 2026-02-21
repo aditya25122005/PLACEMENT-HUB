@@ -1,290 +1,269 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import AdminDashboard from './components/AdminDashboard';
-import AuthScreen from './components/AuthScreen';
-import ContentSubmissionForm from './components/ContentSubmissionForm';
-import TopicPage from './components/TopicPage';
-import UserDashboard from './components/UserDashboard';
-import DSAHub from './components/DSAHub';
-import CompaniesSection from './components/CompaniesSection';
-import ProfilePage from './components/ProfilePage';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  FiGrid, FiBook, FiUser, FiLogOut, FiLayout, 
+  FiTerminal, FiChevronRight, FiPlusCircle, FiMenu, FiArrowLeft
+} from "react-icons/fi";
 
-// Helper function to group content by topic
-const groupContentByTopic = (contentArray) => {
-    return contentArray.reduce((acc, content) => {
-        const topic = content.topic;
-        if (!acc[topic]) acc[topic] = [];
-        acc[topic].push(content);
-        return acc;
-    }, {});
-};
+// Components
+import AdminDashboard from "./components/AdminDashboard";
+import AuthScreen from "./components/AuthScreen";
+import ContentSubmissionForm from "./components/ContentSubmissionForm";
+import TopicPage from "./components/TopicPage";
+import UserDashboard from "./components/UserDashboard";
+import DSAHub from "./components/DSAHub";
+import ProfilePage from "./components/ProfilePage";
 
-// Helper function to get user info from localStorage
-const getLocalUserInfo = () => {
-    const storedInfo = localStorage.getItem('userInfo');
-    return storedInfo ? JSON.parse(storedInfo) : null;
-};
+const NEUTRAL_AVATAR = "https://api.dicebear.com/7.x/initials/svg?seed=User&backgroundColor=cbd5e1";
 
 const App = () => {
+  const [userInfo, setUserInfo] = useState(() => {
+    const stored = localStorage.getItem("userInfo");
+    return stored ? JSON.parse(stored) : null;
+  });
 
-    // Authentication State
-    const [userInfo, setUserInfo] = useState(getLocalUserInfo());
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isModeratorView, setIsModeratorView] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [approvedContent, setApprovedContent] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [activeView, setActiveView] = useState("dashboard");
+  const [subjectList, setSubjectList] = useState([]);
 
-    // UI States
-    const [isModerator, setIsModerator] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const fetchApprovedContent = async () => {
+    try {
+      const res = await axios.get("/api/content/approved");
+      setApprovedContent(res.data);
+    } catch (err) { console.error(err); } finally { setLoading(false); }
+  };
 
-    // Navigation States
-    const [approvedContent, setApprovedContent] = useState([]);
-    const [groupedContent, setGroupedContent] = useState({});
-    const [selectedTopic, setSelectedTopic] = useState(null);
-    const [isDSAHubActive, setIsDSAHubActive] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const refreshUserInfo = async () => {
+    if (!userInfo?._id) return;
+    try {
+      const res = await axios.get(`/api/auth/profile/${userInfo._id}`);
+      localStorage.setItem("userInfo", JSON.stringify(res.data));
+      setUserInfo(res.data);
+    } catch (err) { console.error(err); }
+  };
 
-    // Subjects
-    const [subjectList, setSubjectList] = useState([]);
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    setUserInfo(null);
+    window.location.reload();
+  };
 
-    // --- Fetch Approved Content ---
-    const fetchApprovedContent = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get('/api/content/approved');
-            const data = response.data;
-            setApprovedContent(data);
-            setGroupedContent(groupContentByTopic(data));
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching approved content:", error);
-            setLoading(false);
-        }
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const res = await axios.get("/api/subjects/all");
+        setSubjectList(res.data.filter((s) => s.name !== "All").map((s) => s.name));
+      } catch (err) { console.error(err); }
     };
-
-    // --- Logout ---
-    const handleLogout = () => {
-        localStorage.removeItem('userInfo');
-        setUserInfo(null);
-        window.location.reload();
-    };
-
-    // Scroll to top when page changes
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [selectedTopic, isDSAHubActive, isProfileOpen]);
-
-    // Initial data loading
-    useEffect(() => {
-
-        const fetchSubjects = async () => {
-            try {
-                const response = await axios.get('/api/subjects/all');
-
-                setSubjectList(
-                    response.data
-                        .filter(s => s.name !== 'All')
-                        .map(s => s.name)
-                );
-            } catch (error) {
-                console.error("Failed to fetch subject list:", error.message);
-            }
-        };
-
-        if (userInfo && userInfo.role === 'moderator') {
-            setIsModerator(true);
-        } else {
-            setIsModerator(false);
-        }
-
-        fetchSubjects();
-        fetchApprovedContent();
-
-    }, [userInfo]);
-
-    // --- NOT LOGGED IN ---
-    if (!userInfo) {
-        return (
-            <div className="container">
-                <header className="main-header">
-                    <h1>Verified Placement Prep Hub 🌟</h1>
-                </header>
-                <AuthScreen />
-            </div>
-        );
+    if (userInfo) {
+      setIsModeratorView(userInfo.role === "moderator");
+      fetchSubjects();
+      fetchApprovedContent();
+    } else {
+      setLoading(false);
     }
+  }, [userInfo]);
 
-    // --- MODERATOR VIEW ---
-    if (isModerator) {
-        return (
-            <div className="moderator-view">
-                <header className="mod-header">
-                    <button onClick={() => setIsModerator(false)} className="switch-btn">
-                        Switch to Student View
-                    </button>
-                    <h1>Admin Panel (Logged in as {userInfo.username})</h1>
-                    <button onClick={handleLogout} className="reject-btn">Logout</button>
-                </header>
-                <AdminDashboard
-                    onContentApprovedOrAdded={fetchApprovedContent}
-                    subjectList={subjectList}
-                />
-            </div>
-        );
-    }
+  if (!userInfo) return <AuthScreen />;
 
-    // --- PROFILE PAGE VIEW ⭐ NEW ---
-    if (isProfileOpen) {
-    return (
-        <div className="container">
-            <ProfilePage
-                userId={userInfo._id}
-                onBack={async () => {
-                    try {
-                        // 🔥 REFRESH USER INFO FROM BACKEND
-                        const res = await axios.get(`/api/auth/profile/${userInfo._id}`);
+  return (
+    <div className="min-h-screen bg-[#f1f5f9] text-slate-900 font-sans flex">
 
-                        localStorage.setItem("userInfo", JSON.stringify(res.data));
-                        setUserInfo(res.data);
+      {/* --- SIDEBAR --- */}
+      <motion.aside 
+        animate={{ width: isCollapsed ? 80 : 288 }}
+        className="bg-slate-900 text-white flex flex-col sticky top-0 h-screen hidden lg:flex shadow-2xl z-50 overflow-hidden"
+      >
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute top-6 -right-0 bg-indigo-600 p-1.5 rounded-l-lg hover:bg-indigo-700 transition-colors z-50"
+        >
+          {isCollapsed ? <FiChevronRight size={18}/> : <FiArrowLeft size={18}/>}
+        </button>
 
-                    } catch (err) {
-                        console.error("Failed to refresh userInfo", err);
-                    }
-
-                    setIsProfileOpen(false);
-                }}
-            />
+        <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <div className="min-w-[40px] h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/40">
+            <FiTerminal size={22} className="text-white" />
+          </div>
+          {!isCollapsed && (
+            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-xl font-black tracking-tight uppercase whitespace-nowrap">
+              Placement<span className="text-indigo-400">Hub</span>
+            </motion.span>
+          )}
         </div>
-    );
-}
 
+        <nav className="flex-1 px-3 space-y-2 mt-4">
+          <p className={`text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 px-3 ${isCollapsed ? 'text-center' : ''}`}>
+            {isCollapsed ? "•••" : "Main Navigation"}
+          </p>
 
-    // --- DSA HUB VIEW ---
-    if (isDSAHubActive) {
-        return (
-            <div className="container">
-                <button
-                    onClick={() => setIsDSAHubActive(false)}
-                    className="switch-btn"
-                    style={{ marginBottom: '20px' }}
-                >
-                    Back to Topics Dashboard
-                </button>
-                <DSAHub userId={userInfo._id} />
+          <SidebarLink icon={<FiLayout />} label="Overview"
+            active={activeView === "dashboard"} collapsed={isCollapsed}
+            onClick={() => { setSelectedTopic(null); setActiveView("dashboard"); }}
+          />
+
+          <SidebarLink icon={<FiGrid />} label="DSA Hub"
+            active={activeView === "dsa"} collapsed={isCollapsed}
+            onClick={() => { setSelectedTopic(null); setActiveView("dsa"); }}
+          />
+
+          <SidebarLink icon={<FiUser />} label="Profile"
+            active={activeView === "profile"} collapsed={isCollapsed}
+            onClick={() => { setSelectedTopic(null); setActiveView("profile"); }}
+          />
+
+          {userInfo.role === "moderator" && (
+            <div className={`mt-8 pt-8 border-t border-slate-800`}>
+              {!isCollapsed && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-4">Admin</p>}
+              <SidebarLink 
+                icon={<FiPlusCircle />} 
+                label={isModeratorView ? "Student View" : "Admin Panel"} 
+                active={isModeratorView} 
+                collapsed={isCollapsed}
+                onClick={() => setIsModeratorView(!isModeratorView)} 
+              />
             </div>
-        );
-    }
+          )}
+        </nav>
 
-    // --- TOPIC PAGE VIEW ---
-    if (selectedTopic) {
-        return (
-            <div className="container">
-                <button
-                    onClick={() => setSelectedTopic(null)}
-                    className="switch-btn"
-                    style={{ marginBottom: '20px' }}
-                >
-                    Back to Topics Dashboard
-                </button>
-                <TopicPage
-                    topicName={selectedTopic}
-                    content={groupedContent[selectedTopic] || []}
+        <div className="p-4 mb-4">
+          <button onClick={handleLogout}
+            className={`flex items-center group w-full px-4 py-3 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all font-bold text-sm ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+            <FiLogOut size={20} />
+            {!isCollapsed && <span>Logout</span>}
+          </button>
+        </div>
+      </motion.aside>
+
+      {/* --- MAIN AREA --- */}
+      <main className="flex-1 overflow-y-auto">
+        <header className="h-20 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 flex items-center justify-between px-8">
+          <div className="flex items-center gap-4">
+            <button className="lg:hidden p-2 bg-slate-100 rounded-lg"><FiMenu size={20}/></button>
+            <h2 className="text-lg font-bold text-slate-800 uppercase tracking-tight">
+              {isModeratorView ? "Control Center" : `${activeView}`}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-slate-900 leading-none">{userInfo.username}</p>
+              <p className="text-[10px] text-slate-400 font-medium uppercase mt-1">{userInfo.role}</p>
+            </div>
+            <div className="w-10 h-10 rounded-full border-2 border-indigo-100 shadow-sm overflow-hidden bg-slate-200 flex items-center justify-center cursor-pointer hover:ring-4 hover:ring-indigo-500/10 transition-all"
+              onClick={() => { setSelectedTopic(null); setActiveView("profile"); }}>
+              {userInfo?.dp ? (
+                <img src={`http://localhost:5000${userInfo.dp}`} className="w-full h-full object-cover" alt="profile"
+                  onError={(e) => { e.target.src = NEUTRAL_AVATAR }} />
+              ) : (
+                <FiUser className="text-slate-500 text-xl" />
+              )}
+            </div>
+          </div>
+        </header>
+
+        <div className="p-8 max-w-7xl mx-auto">
+          {isModeratorView ? (
+            <AdminDashboard onContentApprovedOrAdded={fetchApprovedContent} subjectList={subjectList} />
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedTopic ? "topic" : activeView}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+              >
+
+                {activeView === "profile" && (
+                  <ProfilePage
                     userId={userInfo._id}
-                />
-            </div>
-        );
-    }
+                    onBack={async () => {
+                      await refreshUserInfo();
+                      setActiveView("dashboard");
+                    }}
+                  />
+                )}
 
-    // --- LOADING ---
-    if (loading) {
-        return <h1 style={{ textAlign: 'center', marginTop: '50px' }}>Loading Dashboard... ⏳</h1>;
-    }
+                {activeView === "dsa" && <DSAHub userId={userInfo._id} />}
 
-    // --- MAIN STUDENT DASHBOARD ---
-    return (
-        <div className="container">
-            <header className="main-header">
-                <div>
-                    <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-                            <img
-                            src={
-                                userInfo?.dp
-                                ? `http://localhost:5000${userInfo.dp}`
-                                : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                            }
-                            style={{ width: "40px", height: "40px", borderRadius: "50%" }}
-                            alt="dp"
-                            />
-
-                            <h1>Welcome, {userInfo?.username}!</h1>
-
-                        </div>
-                        </div>
-
-                    <small>Your personalized placement preparation hub 🚀</small>
-                </div>
-
-                <div>
-                    {/* ⭐ PROFILE BUTTON ADDED */}
+                {selectedTopic && (
+                  <>
                     <button
-                        onClick={() => setIsProfileOpen(true)}
-                        className="switch-btn"
-                        style={{ marginRight: '10px' }}
-                    >
-                        👤 Profile
+                      onClick={() => setSelectedTopic(null)}
+                      className="mb-6 flex items-center gap-2 text-indigo-600 font-bold text-sm bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors">
+                      ← Back to Overview
                     </button>
+                    <TopicPage
+                      topicName={selectedTopic}
+                      content={approvedContent.filter(c => c.topic === selectedTopic)}
+                      userId={userInfo._id}
+                    />
+                  </>
+                )}
 
-                    <button
-                        onClick={() => setIsDSAHubActive(true)}
-                        className="mod-login-btn"
-                        style={{ marginRight: '10px' }}
-                    >
-                        🔗 DSA Problem Hub
-                    </button>
+                {!selectedTopic && activeView === "dashboard" && !loading && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
+                    <UserDashboard userId={userInfo._id} approvedContent={approvedContent} subjectList={subjectList} />
+                    <section>
+                      <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase text-lg">Curriculum</h3>
+                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 border px-4 py-1.5 rounded-full uppercase tracking-widest">
+                          {subjectList.length} Modules
+                        </span>
+                      </div>
 
-                    <button onClick={handleLogout} className="reject-btn">
-                        Logout
-                    </button>
-                </div>
-            </header>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {subjectList.map((topic) => (
+                          <motion.div key={topic} whileHover={{ y: -8 }}
+                            onClick={() => setSelectedTopic(topic)}
+                            className="group bg-white border border-slate-200 p-8 rounded-[2.5rem] cursor-pointer hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 relative overflow-hidden">
+                            <div className="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 group-hover:rotate-6">
+                              <FiBook size={28} />
+                            </div>
+                            <h4 className="text-xl font-black text-slate-800 mb-2">{topic}</h4>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">
+                              {approvedContent.filter(c => c.topic === topic).length} Resources
+                            </p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </section>
 
-            {/* DASHBOARD */}
-            <UserDashboard
-                userId={userInfo._id}
-                approvedContent={approvedContent}
-                subjectList={subjectList}
-            />
+                    <ContentSubmissionForm onSubmissionSuccess={fetchApprovedContent} subjectList={subjectList} />
+                  </motion.div>
+                )}
 
-            {/* TOPIC SELECTION */}
-            <section className="topics-dashboard">
-                <h2>Choose a Topic to Start Your Systematic Prep</h2>
-
-                <div className="topics-cards-container">
-                    {subjectList.map(topicName => (
-                        <div
-                            key={topicName}
-                            className="topic-card-summary"
-                            onClick={() => setSelectedTopic(topicName)}
-                        >
-                            <h3 className="card-title">{topicName}</h3>
-                            <p>{groupedContent[topicName] ? groupedContent[topicName].length : 0} Verified Items</p>
-                            <span className="topic-action-tag">Click to View & Practice →</span>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* <CompaniesSection /> */}
-
-            {/* SUBMISSION */}
-            <section className="submission-section">
-                <ContentSubmissionForm
-                    onSubmissionSuccess={fetchApprovedContent}
-                    subjectList={subjectList}
-                />
-            </section>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
-    );
+      </main>
+    </div>
+  );
 };
+
+const SidebarLink = ({ icon, label, active, onClick, collapsed }) => (
+  <button 
+    onClick={onClick}
+    title={collapsed ? label : ""}
+    className={`w-full flex items-center transition-all duration-200 font-medium text-sm h-11 rounded-xl ${
+      active ? "bg-indigo-600 text-white shadow-md"
+      : "text-slate-400 hover:bg-white/10 hover:text-slate-200"
+    } ${collapsed ? 'justify-center px-0' : 'px-4 gap-3'}`}
+  >
+    <span className={`text-xl shrink-0 ${active ? "text-white" : "text-slate-500"}`}>{icon}</span>
+    {!collapsed && (
+      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="whitespace-nowrap overflow-hidden">
+        {label}
+      </motion.span>
+    )}
+  </button>
+);
 
 export default App;

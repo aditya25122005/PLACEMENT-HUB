@@ -1,190 +1,244 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import '../App.css';
+import React, { useState } from "react";
+import axios from "axios";
 
 const ContentSubmissionForm = ({ onSubmissionSuccess, subjectList }) => {
+  const [formData, setFormData] = useState({
+    topic:
+      subjectList && subjectList.length > 0
+        ? subjectList[0]
+        : "Aptitude",
+    question_text: "",
+    explanation: "",
+    source_url: "",
+    dsaProblemLink: "",
+    youtubeSolutionLink: "",
+  });
 
-    const [formData, setFormData] = useState({
-        topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude',
-        question_text: '',
-        explanation: '',
-        source_url: '',
-        dsaProblemLink: '',
-        youtubeSolutionLink: '',
-    });
+  const [contentType, setContentType] = useState("text");
+  const [pdfFile, setPdfFile] = useState(null);
 
-    // ⭐ NEW STATES
-    const [contentType, setContentType] = useState("text");
-    const [pdfFile, setPdfFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [message, setMessage] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    if (!formData.topic) {
+      setMessage("❌ Please select a topic.");
+      return;
+    }
 
-        if (!formData.topic) {
-            setMessage('❌ Please select a topic.');
-            return;
-        }
+    setIsSubmitting(true);
+    setMessage("");
 
-        setIsSubmitting(true);
-        setMessage('');
+    try {
+      const submitData = new FormData();
 
-        try {
+      Object.keys(formData).forEach((key) => {
+        submitData.append(key, formData[key]);
+      });
 
-            // ⭐ USE FORMDATA INSTEAD OF JSON
-            const submitData = new FormData();
+      submitData.append("contentType", contentType);
 
-            Object.keys(formData).forEach(key => {
-                submitData.append(key, formData[key]);
-            });
+      if (contentType === "pdf" && pdfFile) {
+        submitData.append("pdf", pdfFile);
+      }
 
-            submitData.append("contentType", contentType);
+      await axios.post("/api/content/submit", submitData);
 
-            // ⭐ attach pdf only if selected
-            if (contentType === "pdf" && pdfFile) {
-                submitData.append("pdf", pdfFile);
-            }
+      setMessage("✅ Success! Your content is submitted for moderator review.");
 
-            await axios.post('/api/content/submit', submitData);
+      setFormData({
+        topic:
+          subjectList && subjectList.length > 0
+            ? subjectList[0]
+            : "Aptitude",
+        question_text: "",
+        explanation: "",
+        source_url: "",
+        dsaProblemLink: "",
+        youtubeSolutionLink: "",
+      });
 
-            setMessage('✅ Success! Your content is submitted for moderator review.');
+      setContentType("text");
+      setPdfFile(null);
 
-            // Reset
-            setFormData({
-                topic: subjectList && subjectList.length > 0 ? subjectList[0] : 'Aptitude',
-                question_text: '',
-                explanation: '',
-                source_url: '',
-                dsaProblemLink: '',
-                youtubeSolutionLink: '',
-            });
+      if (onSubmissionSuccess) onSubmissionSuccess();
+    } catch (error) {
+      const errorMsg =
+        error.response?.data?.message ||
+        "❌ Submission failed. Server error.";
+      setMessage(errorMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-            setContentType("text");
-            setPdfFile(null);
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 md:p-8">
+      {/* HEADER */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-slate-800">
+          Submit a Resource
+        </h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Contribute useful content for placement prep. Moderator approval
+          required before publishing.
+        </p>
+      </div>
 
-            if (onSubmissionSuccess) {
-                onSubmissionSuccess();
-            }
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* CONTENT TYPE + TOPIC */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-600 mb-1">
+              Content Type
+            </label>
+            <select
+              value={contentType}
+              onChange={(e) => setContentType(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="text">Text Theory</option>
+              <option value="video">Video Resource</option>
+              <option value="pdf">PDF Notes</option>
+            </select>
+          </div>
 
-        } catch (error) {
-            console.error('Submission error:', error);
-            const errorMsg = error.response?.data?.message || '❌ Submission failed. Server error.';
-            setMessage(errorMsg);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="submission-container">
-            <h2>Found a Great Resource? Submit It!</h2>
-            <p>Contribute a resource. Moderator approval required before going live.</p>
-
-            <form onSubmit={handleSubmit} className="submission-form">
-
-                {/* ⭐ NEW CONTENT TYPE SELECT */}
-                <label>Content Type:</label>
-                <select
-                    value={contentType}
-                    onChange={(e) => setContentType(e.target.value)}
-                >
-                    <option value="text">Text Theory</option>
-                    <option value="video">Video Resource</option>
-                    <option value="pdf">PDF Notes</option>
-                </select>
-
-                <label>Topic Category:</label>
-                <select name="topic" value={formData.topic} onChange={handleChange} required>
-                    {subjectList.map(t => (
-                        <option key={t} value={t}>{t}</option>
-                    ))}
-                </select>
-
-                {/* ⭐ Hide text input when PDF selected */}
-                {contentType !== "pdf" && (
-                    <>
-                        <label>Question/Content Text (Required):</label>
-                        <textarea
-                            name="question_text"
-                            value={formData.question_text}
-                            onChange={handleChange}
-                            placeholder="Type the question or key concept."
-                            rows="3"
-                        />
-                    </>
-                )}
-
-                {/* ⭐ PDF FILE INPUT */}
-                {contentType === "pdf" && (
-                    <>
-                        <label>Upload PDF Notes:</label>
-                        <input
-                            type="file"
-                            accept="application/pdf"
-                            onChange={(e) => setPdfFile(e.target.files[0])}
-                        />
-                    </>
-                )}
-
-                {contentType !== "pdf" && (
-                    <>
-                        <label>Your Proposed Solution/Explanation (Optional):</label>
-                        <textarea
-                            name="explanation"
-                            value={formData.explanation}
-                            onChange={handleChange}
-                            placeholder="Enter explanation if you have one."
-                            rows="2"
-                        />
-
-                        <hr style={{ margin: '20px 0', border: '1px solid #f0f0f0' }} />
-
-                        <h4>External Source Links (Optional)</h4>
-
-                        <label>Original Source Link:</label>
-                        <input
-                            type="url"
-                            name="source_url"
-                            value={formData.source_url}
-                            onChange={handleChange}
-                        />
-
-                        <label>DSA Problem Link:</label>
-                        <input
-                            type="url"
-                            name="dsaProblemLink"
-                            value={formData.dsaProblemLink}
-                            onChange={handleChange}
-                        />
-
-                        <label>YouTube Solution Link:</label>
-                        <input
-                            type="url"
-                            name="youtubeSolutionLink"
-                            value={formData.youtubeSolutionLink}
-                            onChange={handleChange}
-                        />
-                    </>
-                )}
-
-                <button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit for Verification'}
-                </button>
-            </form>
-
-            {message && (
-                <p className={`submission-message ${message.startsWith('✅') ? 'success' : 'error'}`}>
-                    {message}
-                </p>
-            )}
+          <div>
+            <label className="block text-sm font-medium text-slate-600 mb-1">
+              Topic Category
+            </label>
+            <select
+              name="topic"
+              value={formData.topic}
+              onChange={handleChange}
+              required
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {subjectList.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-    );
+
+        {/* QUESTION TEXT */}
+        {contentType !== "pdf" && (
+          <div>
+            <label className="block text-sm font-medium text-slate-600 mb-1">
+              Question / Content Text
+            </label>
+            <textarea
+              name="question_text"
+              value={formData.question_text}
+              onChange={handleChange}
+              placeholder="Type the question or main concept..."
+              rows="3"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        )}
+
+        {/* PDF UPLOAD */}
+        {contentType === "pdf" && (
+          <div>
+            <label className="block text-sm font-medium text-slate-600 mb-1">
+              Upload PDF Notes
+            </label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setPdfFile(e.target.files[0])}
+              className="block w-full text-sm text-slate-600"
+            />
+          </div>
+        )}
+
+        {/* EXPLANATION + LINKS */}
+        {contentType !== "pdf" && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">
+                Explanation (Optional)
+              </label>
+              <textarea
+                name="explanation"
+                value={formData.explanation}
+                onChange={handleChange}
+                rows="2"
+                placeholder="Add explanation if available..."
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-semibold text-slate-700 mb-3">
+                External Links (Optional)
+              </h4>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <input
+                  type="url"
+                  name="source_url"
+                  placeholder="Original Source URL"
+                  value={formData.source_url}
+                  onChange={handleChange}
+                  className="rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <input
+                  type="url"
+                  name="dsaProblemLink"
+                  placeholder="DSA Problem Link"
+                  value={formData.dsaProblemLink}
+                  onChange={handleChange}
+                  className="rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <input
+                  type="url"
+                  name="youtubeSolutionLink"
+                  placeholder="YouTube Solution Link"
+                  value={formData.youtubeSolutionLink}
+                  onChange={handleChange}
+                  className="rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBMIT BUTTON */}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full md:w-auto bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+        >
+          {isSubmitting ? "Submitting..." : "Submit for Verification"}
+        </button>
+      </form>
+
+      {/* MESSAGE */}
+      {message && (
+        <div
+          className={`mt-5 text-sm font-medium ${
+            message.startsWith("✅")
+              ? "text-green-600"
+              : "text-red-500"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ContentSubmissionForm;

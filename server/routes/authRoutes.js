@@ -132,27 +132,6 @@ router.post("/upload-dp/:id", uploadDp.single("dp"), async (req, res) => {
 });
 
 // 4️⃣ PUT /api/auth/watch-content/:userId
-router.put('/watch-content/:userId', async (req, res) => {
-    const { contentId } = req.body;
-
-    try {
-        const user = await User.findById(req.params.userId);
-        if (!user) return res.status(404).json({ message: 'User not found' });
-
-        if (!user.watchedContent.includes(contentId)) {
-            user.watchedContent.push(contentId);
-            user.markModified('watchedContent');
-            await user.save();
-        }
-
-        res.json({ watchedList: user.watchedContent });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to mark content as watched.' });
-    }
-});
-
-// 5️⃣ PUT /api/auth/solve-dsa/:userId
 router.put('/solve-dsa/:userId', async (req, res) => {
     const { problemId, isSolved } = req.body;
 
@@ -161,14 +140,15 @@ router.put('/solve-dsa/:userId', async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         if (isSolved) {
-            user.solvedDSA = user.solvedDSA.filter(id => id !== problemId);
-        } else {
-            if (!user.solvedDSA.includes(problemId)) {
+            if (!user.solvedDSA.some(id => id.toString() === problemId)) {
                 user.solvedDSA.push(problemId);
             }
+        } else {
+            user.solvedDSA = user.solvedDSA.filter(
+                id => id.toString() !== problemId
+            );
         }
 
-        user.markModified('solvedDSA');
         await user.save();
 
         res.json({
@@ -177,6 +157,7 @@ router.put('/solve-dsa/:userId', async (req, res) => {
         });
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Failed to update solved status.' });
     }
 });
