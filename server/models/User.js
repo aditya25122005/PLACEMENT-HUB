@@ -18,6 +18,13 @@ const UserSchema = new mongoose.Schema({
         enum: ['student', 'moderator'], 
         default: 'student' 
     },
+    
+    isVerified: { type: Boolean, default: true }, 
+    googleId: String,
+    authProvider: { type: String, default: "local" },
+    otp: String,
+    otpExpiry: Date,
+
       // ⭐ PROFILE DETAILS
   dp: { type: String, default: "" },
   dob: { type: Date },
