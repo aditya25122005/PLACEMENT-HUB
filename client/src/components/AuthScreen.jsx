@@ -33,7 +33,7 @@ const AuthScreen = () => {
 
     window.google.accounts.id.renderButton(
       document.getElementById("google-btn"),
-      { theme: "outline", size: "large", width: "100%" }
+      { theme: "outline", size: "large", width: 380 }
     );
   }, []);
 
